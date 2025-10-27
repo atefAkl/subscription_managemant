@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -69,5 +70,37 @@ class User extends Authenticatable
     public function getDashboardRoute(): string
     {
         return $this->isAdmin() ? 'admin.dashboard' : 'client.dashboard';
+    }
+
+    /**
+     * Relationship to subscription requests
+     */
+    public function subscriptionRequests(): HasMany
+    {
+        return $this->hasMany(\App\Models\SubscriptionRequest::class);
+    }
+
+    /**
+     * Relationship to subscriptions
+     */
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(\App\Models\Subscription::class);
+    }
+
+    /**
+     * Relationship to payments
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(\App\Models\Payment::class);
+    }
+
+    /**
+     * Get active subscriptions only
+     */
+    public function activeSubscriptions(): HasMany
+    {
+        return $this->subscriptions()->where('status', 'active');
     }
 }
