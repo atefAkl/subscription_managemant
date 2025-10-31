@@ -36,12 +36,31 @@ class DashboardController extends Controller
             'pending_requests' => SubscriptionRequest::where('status', 'pending')->count(),
             'quoted_requests' => SubscriptionRequest::where('status', 'quoted')->count(),
             'paid_requests' => SubscriptionRequest::where('status', 'paid')->count(),
-            'active_subscriptions' => Subscription::where('status', 'active')->count(),
-            'total_devices' => Device::count(),
-            'active_devices' => Device::where('status', 'active')->count(),
-            'pending_devices' => Device::where('status', 'pending')->count(),
-            'pending_payments' => Payment::where('status', 'pending_verification')->count(),
+            'active_subscriptions' => SubscriptionRequest::where('status', 'active')->count(),
+            'total_devices' => \App\Models\ClientDevice::count(),
+            'active_devices' => \App\Models\ClientDevice::where('status', 'active')->count(),
+            'pending_devices' => \App\Models\ClientDevice::where('status', 'inactive')->count(),
+            'pending_payments' => Payment::where('status', 'pending')->count(),
         ];
+
+        // Payment statistics for admin
+        $paymentStats = [
+            'total_payments' => Payment::count(),
+            'pending_payments' => Payment::where('status', 'pending_verification')->count(),
+            'verified_payments' => Payment::where('status', 'verified')->count(),
+            'rejected_payments' => Payment::where('status', 'rejected')->count(),
+            'total_amount_today' => Payment::where('status', 'verified')
+                ->whereDate('verified_at', today())
+                ->sum('amount'),
+            'total_amount_pending' => Payment::where('status', 'pending_verification')->sum('amount'),
+        ];
+
+        // Recent pending payments
+        $recentPendingPayments = Payment::with(['user', 'subscriptionRequest'])
+            ->where('status', 'pending_verification')
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
 
         // Recent activities
         $recentRequests = SubscriptionRequest::with('user')
@@ -56,7 +75,9 @@ class DashboardController extends Controller
             'totalClients',
             'recentUsers',
             'subscriptionStats',
-            'recentRequests'
+            'paymentStats',
+            'recentRequests',
+            'recentPendingPayments'
         ));
     }
 

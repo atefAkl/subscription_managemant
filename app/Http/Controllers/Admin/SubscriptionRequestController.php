@@ -121,7 +121,7 @@ class SubscriptionRequestController extends Controller
     public function pendingPayments()
     {
         $payments = Payment::with(['subscriptionRequest.user', 'user'])
-            ->where('status', 'pending')
+            ->where('status', 'pending_verification')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
@@ -133,26 +133,92 @@ class SubscriptionRequestController extends Controller
      */
     public function verifyPayment(Request $request, $paymentId)
     {
-        $payment = Payment::where('status', 'pending')->findOrFail($paymentId);
+        try {
+            $payment = Payment::where('status', 'pending_verification')->findOrFail($paymentId);
 
-        $validated = $request->validate([
-            'action' => 'required|in:verify,reject',
-            'admin_notes' => 'nullable|string|max:1000'
-        ]);
+            $validated = $request->validate([
+                'admin_notes' => 'nullable|string|max:1000'
+            ]);
 
-        if ($validated['action'] === 'verify') {
             $payment->verify(Auth::id(), $validated['admin_notes']);
 
             // تحديث حالة طلب الاشتراك
-            $payment->subscriptionRequest->update(['status' => 'active']);
+            if ($payment->subscriptionRequest) {
+                $payment->subscriptionRequest->update(['status' => 'active']);
+            }
 
-            $message = 'تم التحقق من الدفعة بنجاح وتفعيل الاشتراك.';
-        } else {
-            $payment->reject(Auth::id(), $validated['admin_notes']);
-            $message = 'تم رفض الدفعة وإرسال إشعار للعميل.';
+            return response()->json([
+                'success' => true,
+                'message' => 'تم التحقق من الدفعة بنجاح وتفعيل الاشتراك.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'حدث خطأ: ' . $e->getMessage()
+            ], 500);
         }
+    }
 
-        return redirect()->route('admin.payments.pending')
-            ->with('success', $message);
+    /**
+     * رفض الدفعة
+     */
+    public function rejectPayment(Request $request, $paymentId)
+    {
+        try {
+            $payment = Payment::where('status', 'pending_verification')->findOrFail($paymentId);
+
+            $validated = $request->validate([
+                'reason' => 'nullable|string|max:1000'
+            ]);
+
+            $payment->reject(Auth::id(), $validated['reason']);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'تم رفض الدفعة وإرسال إشعار للعميل.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'حدث خطأ: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * عرض تفاصيل الدفعة
+     */
+    public function paymentDetails($paymentId)
+    {
+        $payment = Payment::with(['user', 'subscriptionRequest'])
+            ->findOrFail($paymentId);
+
+        return response()->json([
+            'success' => true,
+            'payment' => [
+                'id' => $payment->id,
+                'amount' => number_format($payment->amount, 2),
+                'payment_method' => $payment->payment_method ?? 'غير محدد',
+                'transaction_id' => $payment->transaction_reference ?? '',
+                'notes' => $payment->admin_notes ?? '',
+                'receipt_path' => $payment->receipt_path ?? null,
+                'status' => $payment->status,
+                'status_label' => $payment->status_label,
+                'created_at' => $payment->created_at->format('Y-m-d H:i'),
+                'paid_at' => $payment->paid_at ? $payment->paid_at->format('Y-m-d H:i') : null,
+                'verified_at' => $payment->verified_at ? $payment->verified_at->format('Y-m-d H:i') : null,
+                'user' => $payment->user ? [
+                    'name' => $payment->user->name,
+                    'email' => $payment->user->email,
+                    'id' => $payment->user->id
+                ] : null,
+                'subscription_request' => $payment->subscriptionRequest ? [
+                    'id' => $payment->subscriptionRequest->id,
+                    'subscription_name' => $payment->subscriptionRequest->subscription_name,
+                    'device_count' => $payment->subscriptionRequest->device_count,
+                    'quoted_price' => $payment->subscriptionRequest->quoted_price
+                ] : null
+            ]
+        ]);
     }
 }

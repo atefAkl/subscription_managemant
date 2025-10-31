@@ -21,13 +21,22 @@ class SubscriptionRequest extends Model
         'admin_notes',
         'quoted_at',
         'payment_receipt',
-        'paid_at'
+        'paid_at',
+        'activated_at',
+        'expires_at',
+        'suspended_at',
+        'renewed_at',
+        'suspension_reason'
     ];
 
     protected $casts = [
         'proposed_start_date' => 'date',
         'quoted_at' => 'datetime',
-        'paid_at' => 'datetime'
+        'paid_at' => 'datetime',
+        'activated_at' => 'datetime',
+        'expires_at' => 'datetime',
+        'suspended_at' => 'datetime',
+        'renewed_at' => 'datetime'
     ];
 
     // العلاقات
@@ -49,6 +58,21 @@ class SubscriptionRequest extends Model
     public function requestDevices(): HasMany
     {
         return $this->hasMany(SubscriptionRequestDevice::class);
+    }
+
+    public function devices(): HasMany
+    {
+        return $this->hasMany(ClientDevice::class, 'subscription_id', 'id');
+    }
+
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class, 'user_id', 'id');
+    }
+
+    public function payment(): HasOne
+    {
+        return $this->hasOne(Payment::class);
     }
 
     // طرق مساعدة

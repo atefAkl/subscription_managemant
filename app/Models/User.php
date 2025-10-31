@@ -23,6 +23,12 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'phone',
+        'address',
+        'notes',
+        'employee_number',
+        'is_app_admin',
+        'last_login_at',
     ];
 
     /**
@@ -45,6 +51,8 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'last_login_at' => 'datetime',
+            'is_app_admin' => 'boolean',
         ];
     }
 
@@ -54,6 +62,14 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
+    }
+
+    /**
+     * Check if user is app admin (super admin)
+     */
+    public function isAppAdmin(): bool
+    {
+        return $this->is_app_admin === true;
     }
 
     /**
@@ -102,5 +118,79 @@ class User extends Authenticatable
     public function activeSubscriptions(): HasMany
     {
         return $this->subscriptions()->where('status', 'active');
+    }
+
+    /**
+     * Relationship to client devices
+     */
+    public function clientDevices()
+    {
+        return $this->hasMany(ClientDevice::class);
+    }
+
+    /**
+     * Get active devices only
+     */
+    public function activeDevices()
+    {
+        return $this->clientDevices()->where('status', 'active');
+    }
+
+    /**
+     * Relationship to admin profile
+     */
+    public function adminProfile()
+    {
+        return $this->hasOne(AdminProfile::class);
+    }
+
+    /**
+     * Relationship to client profile
+     */
+    public function clientProfile()
+    {
+        return $this->hasOne(ClientProfile::class);
+    }
+
+    /**
+     * Get the appropriate profile based on user role
+     */
+    public function getProfile()
+    {
+        if ($this->isAdmin()) {
+            return $this->adminProfile;
+        }
+
+        if ($this->isClient()) {
+            return $this->clientProfile;
+        }
+
+        return null;
+    }
+
+    /**
+     * Generate employee number for admin users
+     */
+    public static function generateEmployeeNumber(): string
+    {
+        do {
+            $number = 'EMP' . str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
+        } while (self::where('employee_number', $number)->exists());
+
+        return $number;
+    }
+
+    /**
+     * Auto-generate employee number when creating admin users
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($user) {
+            if ($user->role === 'admin' && !$user->employee_number) {
+                $user->employee_number = self::generateEmployeeNumber();
+            }
+        });
     }
 }

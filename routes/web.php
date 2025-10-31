@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ClientManagementController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
@@ -9,6 +10,7 @@ use App\Http\Controllers\Client\PaymentController;
 use App\Http\Controllers\Client\StatisticsController;
 use App\Http\Controllers\Admin\SubscriptionRequestController;
 use App\Http\Controllers\Admin\DeviceController as AdminDeviceController;
+use App\Http\Controllers\Admin\UserManagementController;
 use Illuminate\Support\Facades\Route;
 
 // Home Page
@@ -18,6 +20,16 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/test-iphone-system', function () {
     return view('test-iphone-system');
 })->name('test.iphone.system');
+
+// Test Payment Page
+Route::get('/test-payment', function () {
+    return view('test-payment');
+})->name('test.payment');
+
+// Ajax Test Page
+Route::get('/ajax-test', function () {
+    return view('ajax-test');
+})->name('ajax.test')->middleware('auth');
 
 // Simple Test Page
 Route::get('/test-simple', function () {
@@ -52,9 +64,64 @@ Route::middleware('auth')->group(function () {
 
     // Admin-only routes
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
-        // User management
+        // User management (legacy)
         Route::get('/register', [AuthController::class, 'showAdminRegisterForm'])->name('register.form');
         Route::post('/register', [AuthController::class, 'adminRegister'])->name('register');
+
+        // Admin Management Module (Admins only)
+        Route::prefix('users')->name('users.')->group(function () {
+            Route::get('/',                     [UserManagementController::class, 'index'])->name('index');
+            Route::get('/create',               [UserManagementController::class, 'create'])->name('create');
+            Route::post('/',                    [UserManagementController::class, 'store'])->name('store');
+            Route::get('/{user}',               [UserManagementController::class, 'show'])->name('show');
+            Route::get('/{user}/edit',          [UserManagementController::class, 'edit'])->name('edit');
+            Route::put('/{user}',               [UserManagementController::class, 'update'])->name('update');
+            Route::delete('/{user}',            [UserManagementController::class, 'destroy'])->name('destroy');
+            Route::get('/{user}/activities',    [UserManagementController::class, 'activities'])->name('activities');
+            Route::get('/{user}/permissions',   [UserManagementController::class, 'permissions'])->name('permissions');
+        });
+
+        // Client Management Module (Clients only)
+        Route::prefix('clients')->name('clients.')->group(function () {
+            Route::get('/',                                         [ClientManagementController::class, 'index'])->name('index');
+            Route::get('/create',                                   [ClientManagementController::class, 'create'])->name('create');
+            Route::post('/',                                        [ClientManagementController::class, 'store'])->name('store');
+            Route::get('/{client}',                                 [ClientManagementController::class, 'show'])->name('show');
+            Route::get('/{client}/edit',                            [ClientManagementController::class, 'edit'])->name('edit');
+            Route::put('/{client}',                                 [ClientManagementController::class, 'update'])->name('update');
+            Route::delete('/{client}',                              [ClientManagementController::class, 'destroy'])->name('destroy');
+            Route::get('/{client}/activities',                      [ClientManagementController::class, 'activities'])->name('activities');
+            Route::post('/{client}/renew-subscription',             [ClientManagementController::class, 'renewSubscription'])->name('renew-subscription');
+            Route::post('/{client}/add-device',                     [ClientManagementController::class, 'addDevice'])->name('add-device');
+            Route::delete('/{client}/remove-device/{device}',       [ClientManagementController::class, 'removeDevice'])->name('remove-device');
+            Route::patch('/{client}/toggle-device-status/{device}', [ClientManagementController::class, 'toggleDeviceStatus'])->name('toggle-device-status');
+            Route::get('/{client}/device-details/{device}',         [ClientManagementController::class, 'getDeviceDetails'])->name('device-details');
+            Route::post('/{client}/toggle-subscription',            [ClientManagementController::class, 'toggleSubscription'])->name('toggle-subscription');
+            // Additional routes for subscription management within clients
+            Route::post('/{client}/update-subscription',            [ClientManagementController::class, 'updateSubscription'])->name('update-subscription');
+            Route::post('/{client}/create-subscription',            [ClientManagementController::class, 'createSubscription'])->name('create-subscription');
+            Route::delete('/{client}/devices/{device}',             [ClientManagementController::class, 'deleteDevice'])->name('devices.destroy');
+            Route::post('/{client}/devices/{device}/toggle',        [ClientManagementController::class, 'toggleDeviceStatus'])->name('devices.toggle');
+            Route::get('/statistics/dashboard',                     [ClientManagementController::class, 'statistics'])->name('statistics');
+        });
+
+        // System Settings Module
+        Route::prefix('settings')->name('settings.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\SystemSettingsController::class, 'index'])->name('index');
+            Route::put('/update', [\App\Http\Controllers\Admin\SystemSettingsController::class, 'update'])->name('update');
+            Route::post('/clear-cache', [\App\Http\Controllers\Admin\SystemSettingsController::class, 'clearCache'])->name('clear-cache');
+            Route::post('/toggle-maintenance', [\App\Http\Controllers\Admin\SystemSettingsController::class, 'toggleMaintenance'])->name('toggle-maintenance');
+            Route::post('/create-backup', [\App\Http\Controllers\Admin\SystemSettingsController::class, 'createBackup'])->name('create-backup');
+            Route::get('/health-check', [\App\Http\Controllers\Admin\SystemSettingsController::class, 'healthCheck'])->name('health-check');
+            Route::get('/system-stats', [\App\Http\Controllers\Admin\SystemSettingsController::class, 'getSystemStats'])->name('system-stats');
+        });
+
+        // Statistics Module
+        Route::prefix('statistics')->name('statistics.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\StatisticsController::class, 'index'])->name('index');
+            Route::get('/export', [\App\Http\Controllers\Admin\StatisticsController::class, 'exportReport'])->name('export');
+            Route::get('/real-time', [\App\Http\Controllers\Admin\StatisticsController::class, 'getRealTimeStats'])->name('real-time');
+        });
 
         // Subscription Requests Management
         Route::get('/subscription-requests', [SubscriptionRequestController::class, 'index'])->name('subscription-requests.index');
@@ -65,7 +132,33 @@ Route::middleware('auth')->group(function () {
 
         // Payments Management
         Route::get('/payments/pending', [SubscriptionRequestController::class, 'pendingPayments'])->name('payments.pending');
-        Route::post('/payments/{payment}/verify', [SubscriptionRequestController::class, 'verifyPayment'])->name('payments.verify');
+        Route::post('/payments/{payment}/verify', [SubscriptionRequestController::class, 'verifyPayment'])->name('payments.verify')->middleware('web');
+        Route::post('/payments/{payment}/reject', [SubscriptionRequestController::class, 'rejectPayment'])->name('payments.reject')->middleware('web');
+        Route::get('/payments/{payment}/details', [SubscriptionRequestController::class, 'paymentDetails'])->name('payments.details');
+
+        // Subscriptions Management
+        Route::prefix('subscriptions')->name('subscriptions.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Admin\SubscriptionManagementController::class, 'index'])->name('index');
+            Route::get('/create', [App\Http\Controllers\Admin\SubscriptionManagementController::class, 'create'])->name('create');
+            Route::post('/', [App\Http\Controllers\Admin\SubscriptionManagementController::class, 'store'])->name('store');
+            Route::get('/{subscription}', [App\Http\Controllers\Admin\SubscriptionManagementController::class, 'show'])->name('show');
+            Route::get('/{subscription}/edit', [App\Http\Controllers\Admin\SubscriptionManagementController::class, 'edit'])->name('edit');
+            Route::put('/{subscription}', [App\Http\Controllers\Admin\SubscriptionManagementController::class, 'update'])->name('update');
+            Route::post('/{subscription}/activate', [App\Http\Controllers\Admin\SubscriptionManagementController::class, 'activate'])->name('activate');
+            Route::post('/{subscription}/suspend', [App\Http\Controllers\Admin\SubscriptionManagementController::class, 'suspend'])->name('suspend');
+            Route::post('/{subscription}/renew', [App\Http\Controllers\Admin\SubscriptionManagementController::class, 'renew'])->name('renew');
+            Route::delete('/{subscription}', [App\Http\Controllers\Admin\SubscriptionManagementController::class, 'destroy'])->name('destroy');
+
+            // Device management within subscription
+            Route::prefix('{subscription}/devices')->name('devices.')->group(function () {
+                Route::get('/', [App\Http\Controllers\Admin\SubscriptionManagementController::class, 'devices'])->name('index');
+                Route::post('/', [App\Http\Controllers\Admin\SubscriptionManagementController::class, 'addDevice'])->name('store');
+                Route::put('/{device}', [App\Http\Controllers\Admin\SubscriptionManagementController::class, 'updateDevice'])->name('update');
+                Route::post('/{device}/activate', [App\Http\Controllers\Admin\SubscriptionManagementController::class, 'activateDevice'])->name('activate');
+                Route::post('/{device}/suspend', [App\Http\Controllers\Admin\SubscriptionManagementController::class, 'suspendDevice'])->name('suspend');
+                Route::delete('/{device}', [App\Http\Controllers\Admin\SubscriptionManagementController::class, 'removeDevice'])->name('destroy');
+            });
+        });
 
         // Devices Management
         Route::get('/devices', [AdminDeviceController::class, 'index'])->name('devices.index');

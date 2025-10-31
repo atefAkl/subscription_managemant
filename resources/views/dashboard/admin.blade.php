@@ -3,13 +3,23 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>لوحة الإدارة - نظام إدارة الاشتراكات</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>لوحة الإدارة - إدارة الاشتراكات</title>
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <!-- Font -->
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom Styles -->
+    <link href="{{ asset('css/custom-styles.css') }}" rel="stylesheet">
     
     <style>
         body {
@@ -65,230 +75,525 @@
         @endif
 
         <!-- Welcome Section -->
-        <div class="bg-white overflow-hidden shadow rounded-lg mb-6">
-            <div class="px-4 py-5 sm:p-6">
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 overflow-hidden shadow-xl rounded-lg mb-8">
+            <div class="px-6 py-8 sm:p-10 text-white">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H3m2 0h3M9 7h6m-6 4h6m-2 4h2M9 15h2"></path>
                             </svg>
                         </div>
                     </div>
-                    <div class="mr-4">
-                        <h3 class="text-lg leading-6 font-medium text-gray-900">
-                            مرحباً بك في لوحة الإدارة
-                        </h3>
-                        <p class="mt-1 text-sm text-gray-500">
-                            يمكنك من هنا إدارة جميع جوانب النظام ومتابعة الإحصائيات
+                    <div class="mr-6">
+                        <h1 class="text-3xl font-bold">
+                            مرحباً بك في لوحة الإدارة المتقدمة
+                        </h1>
+                        <p class="mt-2 text-blue-100 text-lg">
+                            تحكم كامل في النظام من خلال أربع وحدات إدارية متخصصة
                         </p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Statistics Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-            <!-- Total Users -->
-            <div class="bg-white overflow-hidden shadow rounded-lg">
-                <div class="p-5">
+        <!-- Main Management Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
+            <!-- Card 1: User Management -->
+            <a href="{{ route('admin.users.index') }}" class="bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 card-compact">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-users text-blue-600 text-xl"></i>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-bold text-blue-600">{{ $totalAdmins ?? 0 }}</div>
+                            <div class="text-xs text-gray-500">مديرين</div>
+                        </div>
+                    </div>
+                    <h3 class="font-bold text-gray-900 mb-1">إدارة المستخدمين</h3>
+                    <p class="text-gray-600 text-xs">إدارة المديرين والصلاحيات</p>
+                </div>
+            </a>
+
+            <!-- Card 2: Client Management -->
+            <a href="{{ route('admin.clients.index') }}" class="bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 card-compact">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-building text-green-600 text-xl"></i>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-bold text-green-600">{{ $totalClients ?? 0 }}</div>
+                            <div class="text-xs text-gray-500">عملاء</div>
+                        </div>
+                    </div>
+                    <h3 class="font-bold text-gray-900 mb-1">إدارة العملاء</h3>
+                    <p class="text-gray-600 text-xs">النشطين والجدد</p>
+                </div>
+            </a>
+
+            <!-- Card 3: Subscriptions Management -->
+            <a href="{{ route('admin.subscriptions.index') }}" class="bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 card-compact">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-star text-indigo-600 text-xl"></i>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-bold text-indigo-600">{{ $subscriptionStats['active_subscriptions'] ?? 0 }}</div>
+                            <div class="text-xs text-gray-500">اشتراكات</div>
+                        </div>
+                    </div>
+                    <h3 class="font-bold text-gray-900 mb-1">إدارة الاشتراكات</h3>
+                    <p class="text-gray-600 text-xs">تفعيل وإدارة الخطط</p>
+                </div>
+            </a>
+
+            <!-- Card 4: Devices Management -->
+            <a href="{{ route('admin.devices.index') }}" class="bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 card-compact">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-mobile-alt text-teal-600 text-xl"></i>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-bold text-teal-600">{{ $subscriptionStats['total_devices'] ?? 0 }}</div>
+                            <div class="text-xs text-gray-500">أجهزة</div>
+                        </div>
+                    </div>
+                    <h3 class="font-bold text-gray-900 mb-1">إدارة الأجهزة</h3>
+                    <p class="text-gray-600 text-xs">تفعيل وصيانة الأجهزة</p>
+                </div>
+            </a>
+
+            <!-- Card 5: System Settings -->
+            <a href="{{ route('admin.settings.index') }}" class="bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 card-compact">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-cogs text-purple-600 text-xl"></i>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-bold text-purple-600">6</div>
+                            <div class="text-xs text-gray-500">إعدادات</div>
+                        </div>
+                    </div>
+                    <h3 class="font-bold text-gray-900 mb-1">إعدادات النظام</h3>
+                    <p class="text-gray-600 text-xs">التكوين والأمان</p>
+                </div>
+            </a>
+
+            <!-- Card 6: Statistics -->
+            <a href="{{ route('admin.statistics.index') }}" class="bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 card-compact">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-chart-bar text-orange-600 text-xl"></i>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-bold text-orange-600">12</div>
+                            <div class="text-xs text-gray-500">تقارير</div>
+                        </div>
+                    </div>
+                    <h3 class="font-bold text-gray-900 mb-1">الإحصائيات</h3>
+                    <p class="text-gray-600 text-xs">التقارير والأداء</p>
+                </div>
+            </a>
+        </div>
+
+        <!-- Quick Statistics Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+            <!-- Pending Requests -->
+            <div class="bg-white overflow-hidden shadow-lg rounded-lg border-t-4 border-yellow-500">
+                <div class="p-6">
                     <div class="flex items-center">
                         <div class="flex-shrink-0">
-                            <div class="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
-                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
-                                </svg>
+                            <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-clock text-yellow-600"></i>
                             </div>
                         </div>
                         <div class="mr-4 flex-1">
-                            <dt class="text-sm font-medium text-gray-500 truncate">
-                                إجمالي المستخدمين
+                            <dt class="text-sm font-medium text-gray-500">
+                                طلبات معلقة
                             </dt>
-                            <dd class="mt-1 text-2xl font-semibold text-gray-900">
-                                {{ $totalUsers ?? 0 }}
+                            <dd class="mt-1 text-3xl font-bold text-gray-900">
+                                {{ $subscriptionStats['pending_requests'] ?? 0 }}
                             </dd>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Total Admins -->
-            <div class="bg-white overflow-hidden shadow rounded-lg">
-                <div class="p-5">
+            <!-- Active Devices -->
+            <div class="bg-white overflow-hidden shadow-lg rounded-lg border-t-4 border-green-500">
+                <div class="p-6">
                     <div class="flex items-center">
                         <div class="flex-shrink-0">
-                            <div class="w-8 h-8 bg-red-500 rounded-md flex items-center justify-center">
-                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                                </svg>
+                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-mobile-alt text-green-600"></i>
                             </div>
                         </div>
                         <div class="mr-4 flex-1">
-                            <dt class="text-sm font-medium text-gray-500 truncate">
+                            <dt class="text-sm font-medium text-gray-500">
+                                أجهزة نشطة
+                            </dt>
+                            <dd class="mt-1 text-3xl font-bold text-gray-900">
+                                {{ $subscriptionStats['active_devices'] ?? 0 }}
+                            </dd>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pending Devices -->
+            <div class="bg-white overflow-hidden shadow-lg rounded-lg border-t-4 border-blue-500">
+                <div class="p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-sync-alt text-blue-600"></i>
+                            </div>
+                        </div>
+                        <div class="mr-4 flex-1">
+                            <dt class="text-sm font-medium text-gray-500">
+                                أجهزة معلقة
+                            </dt>
+                            <dd class="mt-1 text-3xl font-bold text-gray-900">
+                                {{ $subscriptionStats['pending_devices'] ?? 0 }}
+                            </dd>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pending Payments -->
+            <div class="bg-white overflow-hidden shadow-lg rounded-lg border-t-4 border-red-500">
+                <div class="p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-credit-card text-red-600"></i>
+                            </div>
+                        </div>
+                        <div class="mr-4 flex-1">
+                            <dt class="text-sm font-medium text-gray-500">
+                                مدفوعات معلقة
+                            </dt>
+                            <dd class="mt-1 text-3xl font-bold text-gray-900">
+                                {{ $subscriptionStats['pending_payments'] ?? 0 }}
+                            </dd>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Admin Count -->
+            <div class="bg-white overflow-hidden shadow-lg rounded-lg border-t-4 border-purple-500">
+                <div class="p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-user-tie text-purple-600"></i>
+                            </div>
+                        </div>
+                        <div class="mr-4 flex-1">
+                            <dt class="text-sm font-medium text-gray-500">
                                 المديرون
                             </dt>
-                            <dd class="mt-1 text-2xl font-semibold text-gray-900">
+                            <dd class="mt-1 text-3xl font-bold text-gray-900">
                                 {{ $totalAdmins ?? 0 }}
                             </dd>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Total Clients -->
-            <div class="bg-white overflow-hidden shadow rounded-lg">
-                <div class="p-5">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <div class="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
-                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                </svg>
-                            </div>
+        <!-- Payments Management Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- Payment Statistics -->
+            <div class="bg-white shadow-xl rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gradient-to-r from-green-500 to-blue-600">
+                    <h3 class="text-lg font-medium text-white flex items-center">
+                        <i class="fas fa-money-bill-wave ml-2"></i>
+                        إحصائيات المدفوعات
+                    </h3>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-green-600">{{ $paymentStats['verified_payments'] ?? 0 }}</div>
+                            <div class="text-sm text-gray-500">مدفوعات مؤكدة</div>
                         </div>
-                        <div class="mr-4 flex-1">
-                            <dt class="text-sm font-medium text-gray-500 truncate">
-                                العملاء
-                            </dt>
-                            <dd class="mt-1 text-2xl font-semibold text-gray-900">
-                                {{ $totalClients ?? 0 }}
-                            </dd>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-yellow-600">{{ $paymentStats['pending_payments'] ?? 0 }}</div>
+                            <div class="text-sm text-gray-500">بانتظار التحقق</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-red-600">{{ $paymentStats['rejected_payments'] ?? 0 }}</div>
+                            <div class="text-sm text-gray-500">مدفوعات مرفوضة</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-blue-600">{{ number_format($paymentStats['total_amount_today'] ?? 0) }}</div>
+                            <div class="text-sm text-gray-500">إجمالي اليوم (ج.م)</div>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="text-lg font-semibold text-gray-800">
+                                    {{ number_format($paymentStats['total_amount_pending'] ?? 0) }} ج.م
+                                </div>
+                                <div class="text-sm text-gray-500">إجمالي المعلق</div>
+                            </div>
+                            <a href="{{ route('admin.payments.pending') }}" 
+                               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                                <i class="fas fa-eye ml-1"></i>
+                                التحقق من المدفوعات
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Active Subscriptions -->
-            <div class="bg-white overflow-hidden shadow rounded-lg">
-                <div class="p-5">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <div class="w-8 h-8 bg-yellow-500 rounded-md flex items-center justify-center">
-                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
-                                </svg>
+            <!-- Recent Pending Payments -->
+            <div class="bg-white shadow-xl rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gradient-to-r from-yellow-500 to-orange-600">
+                    <h3 class="text-lg font-medium text-white flex items-center">
+                        <i class="fas fa-exclamation-triangle ml-2"></i>
+                        مدفوعات تحتاج تحقق
+                    </h3>
+                </div>
+                <div class="divide-y divide-gray-200 max-h-64 overflow-y-auto">
+                    @forelse($recentPendingPayments ?? [] as $payment)
+                        <div class="px-6 py-4 hover:bg-gray-50 transition-colors">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1">
+                                    <div class="text-sm font-medium text-gray-900">
+                                        {{ $payment->user->name ?? 'غير معروف' }}
+                                    </div>
+                                    <div class="text-sm text-gray-500">
+                                        {{ number_format($payment->amount) }} ج.م - {{ $payment->created_at->diffForHumans() }}
+                                    </div>
+                                    @if($payment->subscriptionRequest)
+                                        <div class="text-xs text-blue-600">
+                                            {{ $payment->subscriptionRequest->subscription_name }}
+                                        </div>
+                                    @endif
+                                </div>
+                                <div class="flex items-center space-x-2 space-x-reverse">
+                                    <button onclick="quickVerify({{ $payment->id }})" 
+                                            class="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-xs transition-colors">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button onclick="viewPayment({{ $payment->id }})" 
+                                            class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs transition-colors">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                        <div class="mr-4 flex-1">
-                            <dt class="text-sm font-medium text-gray-500 truncate">
-                                الاشتراكات النشطة
-                            </dt>
-                            <dd class="mt-1 text-2xl font-semibold text-gray-900">
-                                {{ $totalClients ?? 0 }}
-                            </dd>
+                    @empty
+                        <div class="px-6 py-8 text-center">
+                            <div class="text-gray-400 text-4xl mb-2">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <p class="text-gray-500 text-sm">جميع المدفوعات محققة</p>
                         </div>
-                    </div>
+                    @endforelse
                 </div>
+                @if(count($recentPendingPayments ?? []) > 0)
+                    <div class="bg-gray-50 px-6 py-3 text-center">
+                        <a href="{{ route('admin.payments.pending') }}" 
+                           class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                            عرض جميع المدفوعات المعلقة ({{ $paymentStats['pending_payments'] ?? 0 }})
+                        </a>
+                    </div>
+                @endif
             </div>
         </div>
 
-        <!-- Recent Users Table -->
-        <div class="bg-white shadow overflow-hidden sm:rounded-md">
-            <div class="px-4 py-5 sm:px-6">
+        <!-- Recent Activities -->
+        <div class="bg-white shadow-xl overflow-hidden sm:rounded-lg">
+            <div class="px-6 py-5 border-b border-gray-200">
                 <h3 class="text-lg leading-6 font-medium text-gray-900">
-                    المستخدمون الجدد
+                    <i class="fas fa-clipboard-list ml-1"></i> النشاطات الحديثة
                 </h3>
                 <p class="mt-1 max-w-2xl text-sm text-gray-500">
-                    قائمة بآخر المستخدمين المسجلين في النظام
+                    آخر الطلبات والأنشطة في النظام
                 </p>
             </div>
             <ul class="divide-y divide-gray-200">
-                @forelse($recentUsers ?? [] as $recentUser)
+                @forelse($recentRequests ?? [] as $request)
                     <li>
-                        <div class="px-4 py-4 sm:px-6">
+                        <div class="px-6 py-4 hover:bg-gray-50 transition-colors">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center">
                                     <div class="flex-shrink-0 h-10 w-10">
-                                        <div class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
-                                            <span class="text-sm font-medium text-gray-700">
-                                                {{ substr($recentUser->name, 0, 2) }}
+                                        <div class="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
+                                            <span class="text-sm font-medium text-white">
+                                                {{ substr($request->user->name ?? 'غير معروف', 0, 2) }}
                                             </span>
                                         </div>
                                     </div>
                                     <div class="mr-4">
                                         <div class="text-sm font-medium text-gray-900">
-                                            {{ $recentUser->name }}
+                                            طلب اشتراك جديد من {{ $request->user->name ?? 'غير معروف' }}
                                         </div>
                                         <div class="text-sm text-gray-500">
-                                            {{ $recentUser->email }}
+                                            {{ $request->subscription_type ?? 'غير محدد' }} - {{ $request->created_at->diffForHumans() }}
                                         </div>
                                     </div>
                                 </div>
                                 <div class="flex items-center">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                                        {{ $recentUser->role === 'admin' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800' }}">
-                                        {{ $recentUser->role === 'admin' ? 'مدير' : 'عميل' }}
+                                        @if($request->status === 'pending') bg-yellow-100 text-yellow-800
+                                        @elseif($request->status === 'quoted') bg-blue-100 text-blue-800
+                                        @elseif($request->status === 'paid') bg-green-100 text-green-800
+                                        @else bg-gray-100 text-gray-800 @endif">
+                                        @if($request->status === 'pending') معلق
+                                        @elseif($request->status === 'quoted') تم التسعير
+                                        @elseif($request->status === 'paid') مدفوع
+                                        @else {{ $request->status }} @endif
                                     </span>
-                                    <div class="mr-4 text-sm text-gray-500">
-                                        {{ $recentUser->created_at->diffForHumans() }}
-                                    </div>
                                 </div>
                             </div>
                         </div>
                     </li>
                 @empty
                     <li>
-                        <div class="px-4 py-4 sm:px-6 text-center">
-                            <p class="text-gray-500">لا توجد بيانات متاحة</p>
+                        <div class="px-6 py-8 text-center">
+                            <div class="text-gray-400 text-6xl mb-4">
+                                <i class="fas fa-clipboard-list"></i>
+                            </div>
+                            <p class="text-gray-500">لا توجد نشاطات حديثة</p>
                         </div>
                     </li>
                 @endforelse
             </ul>
-        </div>
-
-        <!-- Management Actions -->
-        <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="bg-white overflow-hidden shadow rounded-lg">
-                <div class="p-6">
+            @if(count($recentRequests ?? []) > 0)
+                <div class="bg-gray-50 px-6 py-3">
                     <div class="text-center">
-                        <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
-                            </svg>
-                        </div>
-                        <h3 class="text-lg font-medium text-gray-900 mb-2">إدارة المستخدمين</h3>
-                        <p class="text-gray-500 text-sm mb-4">عرض وإدارة جميع المستخدمين المسجلين</p>
-                        <button class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
-                            عرض المستخدمين
+                        <button class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                            عرض جميع النشاطات
                         </button>
                     </div>
                 </div>
-            </div>
-
-            <div class="bg-white overflow-hidden shadow rounded-lg">
-                <div class="p-6">
-                    <div class="text-center">
-                        <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
-                            </svg>
-                        </div>
-                        <h3 class="text-lg font-medium text-gray-900 mb-2">إضافة مستخدم جديد</h3>
-                        <p class="text-gray-500 text-sm mb-4">إضافة مديرين أو عملاء جدد للنظام</p>
-                        <a href="{{ route('admin.register.form') }}" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition inline-block">
-                            إضافة مستخدم
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white overflow-hidden shadow rounded-lg">
-                <div class="p-6">
-                    <div class="text-center">
-                        <div class="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                            </svg>
-                        </div>
-                        <h3 class="text-lg font-medium text-gray-900 mb-2">التقارير والإحصائيات</h3>
-                        <p class="text-gray-500 text-sm mb-4">عرض التقارير التفصيلية للنظام</p>
-                        <button class="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition">
-                            عرض التقارير
-                        </button>
-                    </div>
-                </div>
-            </div>
+            @endif
         </div>
     </div>
+
+    <!-- Payment Management Scripts -->
+    <script>
+        // Setup CSRF token for all AJAX requests
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+
+        function quickVerify(paymentId) {
+            if (confirm('هل أنت متأكد من تأكيد هذه الدفعة بشكل سريع؟')) {
+                $.ajax({
+                    url: `/admin/payments/${paymentId}/verify`,
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        admin_notes: 'تم التحقق السريع من لوحة البيانات'
+                    },
+                    success: function(data) {
+                        if (data.success) {
+                            alert('تم تأكيد الدفعة بنجاح');
+                            location.reload();
+                        } else {
+                            alert(data.message || 'حدث خطأ في تأكيد الدفعة');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        if (xhr.status === 419) {
+                            alert('انتهت صلاحية الجلسة. يرجى إعادة تحميل الصفحة.');
+                        } else {
+                            alert('حدث خطأ في الاتصال: ' + error);
+                        }
+                    }
+                });
+            }
+        }
+
+        function viewPayment(paymentId) {
+            window.open(`/admin/payments/pending`, '_blank');
+        }
+
+        // Auto-refresh statistics every 30 seconds
+        setInterval(() => {
+            fetch('/admin/dashboard')
+                .then(() => {
+                    // Update timestamp in the corner
+                    const now = new Date();
+                    const time = now.toLocaleTimeString('ar-EG');
+                    
+                    // Add a subtle indicator that data was refreshed
+                    const indicators = document.querySelectorAll('.fas.fa-sync-alt');
+                    indicators.forEach(indicator => {
+                        indicator.style.color = '#10B981';
+                        setTimeout(() => {
+                            indicator.style.color = '';
+                        }, 1000);
+                    });
+                })
+                .catch(() => {
+                    console.log('Auto-refresh failed');
+                });
+        }, 30000);
+
+        // Notification sound for new pending payments (optional)
+        let lastPendingCount = {{ $paymentStats['pending_payments'] ?? 0 }};
+        
+        function checkNewPayments() {
+            fetch('/admin/dashboard')
+                .then(response => response.text())
+                .then(html => {
+                    // This is a simplified check - in a real app you'd use an API endpoint
+                    const currentCount = {{ $paymentStats['pending_payments'] ?? 0 }};
+                    if (currentCount > lastPendingCount) {
+                        // New payment notification
+                        showNotification(`مدفوعة جديدة بانتظار التحقق (${currentCount})`);
+                        lastPendingCount = currentCount;
+                    }
+                })
+                .catch(() => {
+                    console.log('Payment check failed');
+                });
+        }
+
+        function showNotification(message) {
+            // Create a simple toast notification
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-4 left-4 bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform';
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-bell ml-2"></i>
+                    ${message}
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 5000);
+        }
+
+        // Check for new payments every 60 seconds
+        setInterval(checkNewPayments, 60000);
+    </script>
 </body>
 </html>

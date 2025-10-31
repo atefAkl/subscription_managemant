@@ -23,6 +23,7 @@ return new class extends Migration
       $table->text('admin_notes')->nullable();
       $table->timestamp('paid_at')->nullable();
       $table->timestamp('verified_at')->nullable();
+      $table->foreignId('verified_by')->nullable()->constrained('users');
       $table->timestamps();
 
       $table->index(['user_id', 'status']);

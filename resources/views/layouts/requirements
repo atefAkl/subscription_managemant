@@ -1,0 +1,22 @@
+admin
+
+  dashboard
+      subscription management - add subscription ()
+      Services Management - add services ()
+      client Management
+          subscription [multipe]  -> approve
+                                  -> 2500
+                                  -> payment verify -> approve
+                                     [received ids] display as list
+                                     everey item (activate/deactivate - block/unblock) pulk actions
+
+client
+
+  dashboard
+
+    request subscription   -> all client data + subscriptionId + ids count -> send
+                           -> payment -> receipt
+                           -> add ids according to ss Customization
+                              form [send ids] array (idNumber) string{0-9AZaz}10
+                              view (ids) (status - info)
+                              form [extend subscription] subscriptionId + ids count -> send

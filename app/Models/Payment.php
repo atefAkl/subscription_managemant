@@ -17,7 +17,8 @@ class Payment extends Model
         'status',
         'admin_notes',
         'paid_at',
-        'verified_at'
+        'verified_at',
+        'verified_by'
     ];
 
     protected $casts = [
@@ -46,7 +47,7 @@ class Payment extends Model
     public function getStatusLabelAttribute(): string
     {
         $labels = [
-            'pending' => 'في انتظار التحقق',
+            'pending_verification' => 'في انتظار التحقق',
             'verified' => 'تم التحقق',
             'rejected' => 'مرفوض'
         ];
@@ -56,7 +57,7 @@ class Payment extends Model
 
     public function canBeVerified(): bool
     {
-        return $this->status === 'pending';
+        return $this->status === 'pending_verification';
     }
 
     public function verify($adminId, $notes = null): void
@@ -64,7 +65,7 @@ class Payment extends Model
         $this->status = 'verified';
         $this->verified_at = now();
         $this->verified_by = $adminId;
-        $this->admin_notes = $notes;
+        $this->admin_notes = $notes ?? 'Thanks for your payment.';
         $this->save();
     }
 
