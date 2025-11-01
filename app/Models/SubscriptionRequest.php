@@ -6,11 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class SubscriptionRequest extends Model
 {
     protected $fillable = [
         'user_id',
+        'serial_number',
         'subscription_name',
         'device_count',
         'proposed_start_date',
@@ -43,6 +45,16 @@ class SubscriptionRequest extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function generateSerialNumber()
+    {
+        //generate unique serial number
+        $serialNumber = Str::random(16);
+        while (SubscriptionRequest::where('serial_number', $serialNumber)->exists()) {
+            $serialNumber = Str::random(16);
+        }
+        return $serialNumber;
     }
 
     public function subscription(): HasOne

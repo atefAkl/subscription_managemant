@@ -201,6 +201,11 @@ sup {
     color: white;
     text-align: center;
 }
+.card-header {
+    background-color: #05642d6b;
+    font-size: 14px;
+    color: #fff;
+}
 
 .stat-number {
     font-size: 28px;

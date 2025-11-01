@@ -8,22 +8,23 @@
     <x-breadcrumb :items="[
     ['label' => 'لوحة الادارة', 'url' => route('client.dashboard')], 
     ['label' => 'ادارة الاشتراكات', 'url' => route('client.subscriptions')], 
-    ['label' => 'طلب اشتراك جديد', 'url' => '#']
+    ['label' => 'تحديث بيانات الطلب', 'url' => '#']
 ]" />
     <!-- Header -->
     <div class="mb-6">
         <h3 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl">
-            طلب اشتراك جديد
+            تحديث بيانات الطلب #{{$subscription->serial_number}}
         </h3>
         <p class="mt-1 text-sm text-gray-500">
-            املأ البيانات التالية لإرسال طلب اشتراك جديد. سيتم مراجعة طلبك وإرسال عرض السعر قريباً.
+            يمكنك تعديل الطلب مالم يكن نشطا.
         </p>
     </div>
 
     <!-- Form -->
     <div class="bg-white shadow sm:rounded-lg">
-        <form method="POST" action="{{ route('client.subscriptions.store') }}">
+        <form method="POST" action="{{ route('client.subscriptions.update', $subscription->id) }}">
             @csrf
+            @method('PUT')
             <div class="px-4 py-5 sm:p-6">
                 <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
                     <!-- اسم الاشتراك -->

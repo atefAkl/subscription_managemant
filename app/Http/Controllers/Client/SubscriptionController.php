@@ -7,6 +7,7 @@ use App\Models\SubscriptionRequest;
 use App\Models\Subscription;
 use App\Models\Device;
 use App\Models\Payment;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -64,12 +65,18 @@ class SubscriptionController extends Controller
             'proposed_start_date.after_or_equal' => 'تاريخ البداية لا يمكن أن يكون في الماضي'
         ]);
 
+        $validated['serial_number'] = SubscriptionRequest::generateSerialNumber();
+
         $validated['user_id'] = Auth::id();
+        try {
 
-        SubscriptionRequest::create($validated);
-
-        return redirect()->route('client.subscriptions')
-            ->with('success', 'تم إرسال طلب الاشتراك بنجاح! سيتم مراجعته وإرسال عرض السعر قريباً.');
+            SubscriptionRequest::create($validated);
+            return redirect()->route('client.subscriptions')
+                ->with('success', 'تم إرسال طلب الاشتراك بنجاح! سيتم مراجعته وإرسال عرض السعر قريباً.');
+        } catch (QueryException $e) {
+            return redirect()->back()
+                ->withInput()->with('error', 'حدث خطأ أثناء إرسال طلب الاشتراك!' . $e->getMessage());
+        }
     }
 
     /**
@@ -254,6 +261,29 @@ class SubscriptionController extends Controller
      * عرض تفاصيل اشتراك نشط
      */
     public function show($id)
+    {
+        $subscription = Subscription::where('user_id', Auth::id())
+            ->with(['devices', 'subscriptionRequest'])
+            ->findOrFail($id);
+
+        return view('client.subscriptions.show', compact('subscription'));
+    }
+
+    /**
+     * نموذج تحديث بيانات اشتراك قبل تنشيطه
+     */
+    public function edit($id)
+    {
+        $subscription = SubscriptionRequest::where('user_id', Auth::id())
+            ->findOrFail($id);
+
+        return view('client.subscriptions.edit', compact('subscription'));
+    }
+
+    /**
+     * تحديث بيانات اشتراك قبل تنشيطه
+     */
+    public function update($id)
     {
         $subscription = Subscription::where('user_id', Auth::id())
             ->with(['devices', 'subscriptionRequest'])

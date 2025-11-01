@@ -11,6 +11,7 @@ use App\Http\Controllers\Client\StatisticsController;
 use App\Http\Controllers\Admin\SubscriptionRequestController;
 use App\Http\Controllers\Admin\DeviceController as AdminDeviceController;
 use App\Http\Controllers\Admin\UserManagementController;
+use App\Http\Controllers\ServicePackageController;
 use Illuminate\Support\Facades\Route;
 
 // Home Page
@@ -125,6 +126,7 @@ Route::middleware('auth')->group(function () {
 
         // Subscription Requests Management
         Route::get('/subscription-requests', [SubscriptionRequestController::class, 'index'])->name('subscription-requests.index');
+        Route::get('/subscription/{id}/quote',                          [SubscriptionRequestController::class, 'showQuoteForm'])->name('subscriptions.quote');
         Route::get('/subscription-requests/{id}', [SubscriptionRequestController::class, 'show'])->name('subscription-requests.show');
         Route::get('/subscription-requests/{id}/quote', [SubscriptionRequestController::class, 'showQuoteForm'])->name('subscription-requests.quote');
         Route::post('/subscription-requests/{id}/quote', [SubscriptionRequestController::class, 'sendQuote'])->name('subscription-requests.quote.send');
@@ -136,6 +138,26 @@ Route::middleware('auth')->group(function () {
         Route::post('/payments/{payment}/reject', [SubscriptionRequestController::class, 'rejectPayment'])->name('payments.reject')->middleware('web');
         Route::get('/payments/{payment}/details', [SubscriptionRequestController::class, 'paymentDetails'])->name('payments.details');
 
+        // Packages Management
+        Route::prefix('packages')->name('packages.')->group(function () {
+
+            Route::prefix('features')->name('features.')->group(function () {
+
+                Route::post('',                [ServicePackageController::class, 'storeFeature'])->name('store');
+                Route::put('/{package}',       [ServicePackageController::class, 'update'])->name('update');
+                Route::delete('/{package}',    [ServicePackageController::class, 'destroy'])->name('destroy');
+            });
+            Route::post('/{package}/customize/features',    [ServicePackageController::class, 'customizeFeatures'])->name('customizeFeatures');
+
+            // Packages Management
+            Route::get('',                 [ServicePackageController::class, 'index'])->name('index');
+            Route::get('/create',          [ServicePackageController::class, 'create'])->name('create');
+            Route::post('',                [ServicePackageController::class, 'store'])->name('store');
+            Route::get('/{package}',       [ServicePackageController::class, 'show'])->name('show');
+            Route::get('/{package}/edit',  [ServicePackageController::class, 'edit'])->name('edit');
+            Route::put('/{package}',       [ServicePackageController::class, 'update'])->name('update');
+            Route::delete('/{package}',    [ServicePackageController::class, 'destroy'])->name('packages.destroy');
+        });
         // Subscriptions Management
         Route::prefix('subscriptions')->name('subscriptions.')->group(function () {
             Route::get('/', [App\Http\Controllers\Admin\SubscriptionManagementController::class, 'index'])->name('index');
@@ -178,6 +200,9 @@ Route::middleware('auth')->group(function () {
         // Subscriptions
         Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions');
         Route::get('/subscriptions/create', [SubscriptionController::class, 'create'])->name('subscriptions.create');
+        Route::get('/subscriptions/cancel/{id}', [SubscriptionController::class, 'cancel'])->name('subscriptions.cancel');
+        Route::get('/subscriptions/{id}/edit', [SubscriptionController::class, 'edit'])->name('subscriptions.edit');
+        Route::put('/subscriptions/{id}/update', [SubscriptionController::class, 'update'])->name('subscriptions.update');
         Route::post('/subscriptions', [SubscriptionController::class, 'store'])->name('subscriptions.store');
         Route::get('/subscriptions/{id}', [SubscriptionController::class, 'show'])->name('subscriptions.show');
         Route::get('/subscriptions/{id}/devices', [SubscriptionController::class, 'manageDevices'])->name('subscriptions.devices');

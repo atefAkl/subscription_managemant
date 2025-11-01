@@ -80,8 +80,8 @@
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">قائمة الاشتراكات</h5>
             <div class="d-flex gap-2">
-                <input type="text" class="form-control form-control-sm" placeholder="بحث في العملاء..." 
-                       id="clientSearch" style="width: 200px;" value="{{request('client_search')}}">
+                <input type="text" class="form-control form-control-sm" placeholder="بحث في العملاء..." id="clientSearch" style="width: 200px;"
+                    value="{{request('client_search')}}">
                 <select class="form-select form-select-sm" id="statusFilter" style="width: 150px;">
                     <option {{ request('status') == 'all' ? 'selected' : ''}} value="all">جميع الحالات</option>
                     <option {{ request('status') == 'pending' ? 'selected' : ''}} value="pending">في الانتظار</option>
@@ -112,8 +112,8 @@
                             <td>
                                 <div class="d-flex align-items-center">
                                     <div class="flex-shrink-0">
-                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" 
-                                             style="width: 40px; height: 40px; font-size: 14px; font-weight: bold;">
+                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                                            style="width: 40px; height: 40px; font-size: 14px; font-weight: bold;">
                                             {{ substr($subscription->client->name, 0, 2) }}
                                         </div>
                                     </div>
@@ -126,45 +126,45 @@
                             </td>
                             <td>
                                 @switch($subscription->status)
-                                    @case('active')
-                                        <span class="badge bg-success">نشط</span>
-                                        @if($subscription->expires_at && $subscription->expires_at < now()->addDays(30))
-                                            <br><small class="text-warning">ينتهي قريباً</small>
-                                        @endif
-                                        @break
+                                @case('active')
+                                <span class="badge bg-success">نشط</span>
+                                @if($subscription->expires_at && $subscription->expires_at < now()->addDays(30))
+                                    <br><small class="text-warning">ينتهي قريباً</small>
+                                    @endif
+                                    @break
                                     @case('pending')
-                                        <span class="badge bg-warning">في الانتظار</span>
-                                        @break
+                                    <span class="badge bg-warning">في الانتظار</span>
+                                    @break
                                     @case('expired')
-                                        <span class="badge bg-danger">منتهي</span>
-                                        @break
+                                    <span class="badge bg-danger">منتهي</span>
+                                    @break
                                     @case('suspended')
-                                        <span class="badge bg-secondary">معلق</span>
-                                        @break
+                                    <span class="badge bg-secondary">معلق</span>
+                                    @break
                                     @default
-                                        <span class="badge bg-light text-dark">غير محدد</span>
-                                @endswitch
+                                    <span class="badge bg-light text-dark">غير محدد</span>
+                                    @endswitch
                             </td>
                             <td>
                                 @if($subscription->activated_at)
-                                    {{ $subscription->activated_at->format('Y/m/d') }}
-                                    <br><small class="text-muted">{{ $subscription->activated_at->diffForHumans() }}</small>
+                                {{ $subscription->activated_at->format('Y/m/d') }}
+                                <br><small class="text-muted">{{ $subscription->activated_at->diffForHumans() }}</small>
                                 @else
-                                    <span class="text-muted">لم يفعل بعد</span>
+                                <span class="text-muted">لم يفعل بعد</span>
                                 @endif
                             </td>
                             <td>
                                 @if($subscription->expires_at)
-                                    {{ $subscription->expires_at->format('Y/m/d') }}
-                                    <br><small class="text-muted">
-                                        @if($subscription->expires_at > now())
-                                            {{ $subscription->expires_at->diffForHumans() }}
-                                        @else
-                                            <span class="text-danger">منتهي منذ {{ $subscription->expires_at->diffForHumans() }}</span>
-                                        @endif
-                                    </small>
+                                {{ $subscription->expires_at->format('Y/m/d') }}
+                                <br><small class="text-muted">
+                                    @if($subscription->expires_at > now())
+                                    {{ $subscription->expires_at->diffForHumans() }}
+                                    @else
+                                    <span class="text-danger">منتهي منذ {{ $subscription->expires_at->diffForHumans() }}</span>
+                                    @endif
+                                </small>
                                 @else
-                                    <span class="text-muted">غير محدد</span>
+                                <span class="text-muted">غير محدد</span>
                                 @endif
                             </td>
                             <td>
@@ -175,64 +175,58 @@
                             </td>
                             <td>
                                 @if($subscription->payment)
-                                    <strong>{{ number_format($subscription->payment->amount) }} ر.س</strong>
+                                <strong>{{ number_format($subscription->payment->amount) }} ر.س</strong>
                                 @else
-                                    <span class="text-muted">غير محدد</span>
+                                <span class="text-muted">غير محدد</span>
                                 @endif
                             </td>
                             <td>
                                 @if($subscription->payment)
-                                    @switch($subscription->payment->status)
-                                        @case('verified')
-                                            <span class="badge bg-success">مؤكد</span>
-                                            @break
-                                        @case('pending_verification')
-                                            <span class="badge bg-warning">في الانتظار</span>
-                                            @break
-                                        @case('rejected')
-                                            <span class="badge bg-danger">مرفوض</span>
-                                            @break
-                                        @default
-                                            <span class="badge bg-light text-dark">غير محدد</span>
-                                    @endswitch
+                                @switch($subscription->payment->status)
+                                @case('verified')
+                                <span class="badge bg-success">مؤكد</span>
+                                @break
+                                @case('pending_verification')
+                                <span class="badge bg-warning">في الانتظار</span>
+                                @break
+                                @case('rejected')
+                                <span class="badge bg-danger">مرفوض</span>
+                                @break
+                                @default
+                                <span class="badge bg-light text-dark">غير محدد</span>
+                                @endswitch
                                 @else
-                                    <span class="text-muted">لا يوجد دفع</span>
+                                <span class="text-muted">لا يوجد دفع</span>
                                 @endif
                             </td>
                             <td>
                                 <div class="btn-group" role="group">
-                                    <button type="button" class="btn btn-sm btn-outline-primary" 
-                                            onclick="viewSubscription({{ $subscription->id }})">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="viewSubscription({{ $subscription->id }})">
                                         <i class="fas fa-eye"></i>
                                     </button>
-                                    
+
                                     @if($subscription->status === 'pending')
-                                        <button type="button" class="btn btn-sm btn-outline-success" 
-                                                onclick="showActivateModal({{ $subscription->id }})">
-                                            <i class="fas fa-play"></i>
-                                        </button>
+                                    <button type="button" class="btn btn-sm btn-outline-success" onclick="showActivateModal({{ $subscription->id }})">
+                                        <i class="fas fa-play"></i>
+                                    </button>
                                     @endif
-                                    
+
                                     @if($subscription->status === 'active')
-                                        <button type="button" class="btn btn-sm btn-outline-warning" 
-                                                onclick="showSuspendModal({{ $subscription->id }})">
-                                            <i class="fas fa-pause"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-outline-info" 
-                                                onclick="showRenewModal({{ $subscription->id }})">
-                                            <i class="fas fa-sync"></i>
-                                        </button>
+                                    <button type="button" class="btn btn-sm btn-outline-warning" onclick="showSuspendModal({{ $subscription->id }})">
+                                        <i class="fas fa-pause"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-info" onclick="showRenewModal({{ $subscription->id }})">
+                                        <i class="fas fa-sync"></i>
+                                    </button>
                                     @endif
-                                    
+
                                     @if($subscription->status === 'suspended')
-                                        <button type="button" class="btn btn-sm btn-outline-success" 
-                                                onclick="showActivateModal({{ $subscription->id }})">
-                                            <i class="fas fa-play"></i>
-                                        </button>
+                                    <button type="button" class="btn btn-sm btn-outline-success" onclick="showActivateModal({{ $subscription->id }})">
+                                        <i class="fas fa-play"></i>
+                                    </button>
                                     @endif
-                                    
-                                    <button type="button" class="btn btn-sm btn-outline-danger" 
-                                            onclick="deleteSubscription({{ $subscription->id }})">
+
+                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteSubscription({{ $subscription->id }})">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
@@ -273,14 +267,12 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">تاريخ التفعيل</label>
-                        <input type="date" class="form-control" name="activation_date" 
-                               value="{{ now()->format('Y-m-d') }}" required>
+                        <input type="date" class="form-control" name="activation_date" value="{{ now()->format('Y-m-d') }}" required>
                         <div class="form-text">سيتم حساب تاريخ الانتهاء تلقائياً (بعد سنة من تاريخ التفعيل)</div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">ملاحظات إدارية</label>
-                        <textarea class="form-control" name="notes" rows="3" 
-                                  placeholder="أي ملاحظات خاصة بالتفعيل..."></textarea>
+                        <textarea class="form-control" name="notes" rows="3" placeholder="أي ملاحظات خاصة بالتفعيل..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -308,8 +300,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">سبب التعليق *</label>
-                        <textarea class="form-control" name="reason" rows="3" required
-                                  placeholder="يرجى توضيح سبب تعليق الاشتراك..."></textarea>
+                        <textarea class="form-control" name="reason" rows="3" required placeholder="يرجى توضيح سبب تعليق الاشتراك..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -341,8 +332,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">مبلغ التجديد</label>
-                        <input type="number" class="form-control" name="payment_amount" 
-                               placeholder="0.00" step="0.01" required>
+                        <input type="number" class="form-control" name="payment_amount" placeholder="0.00" step="0.01" required>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -358,7 +348,7 @@
 
 @section('scripts')
 <script>
-$(document).ready(function() {
+    $(document).ready(function() {
     // Search and filter functionality
     $('#clientSearch').on('blur', function() {
         filterSubscriptions();
@@ -457,7 +447,7 @@ $(document).ready(function() {
 });
 
 function viewSubscription(subscriptionId) {
-    window.open(`/admin/subscriptions/${subscriptionId}`, '_blank');
+    window.location.href = `/admin/subscriptions/${subscriptionId}`;
 }
 
 function showActivateModal(subscriptionId) {

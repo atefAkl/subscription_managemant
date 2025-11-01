@@ -14,186 +14,204 @@
             <h2 class="mb-1">تفاصيل اشتراك {{ $subscription->client->name }}</h2>
             <p class="text-muted mb-0">إدارة شاملة للاشتراك والأجهزة المرتبطة</p>
         </div>
-        <div class="d-flex gap-2">
-            <a href="{{ route('admin.subscriptions.index') }}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left"></i> العودة للقائمة
-            </a>
-            <button class="btn btn-primary" onclick="editSubscription()">
-                <i class="fas fa-edit"></i> تعديل الاشتراك
-            </button>
-        </div>
+
     </div>
 
     <div class="row">
         <!-- Subscription Info -->
         <div class="col-lg-4">
-            <tab class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">معلومات الاشتراك</h5>
+            <div class="card mb-4 shadow">
+                <div class="card-header py-2">
+                    <h3 class="mb-0">معلومات الاشتراك</h3>
                 </div>
-               
-                بيان الاشتراك: {{$subscription->subscription_name}}<br>
-                عدد الأجهزة: {{$subscription->device_count}}<br>
-                الوقت المرجح للتفعيل: {{$subscription->proposed_start_date->format('Y/m/d')}}<br>
-                ملاحظات العميل: {{$subscription->notes ?? 'لا يوجد'}}<br>
-                حالة الاشتراك: {{$subscription->status ?? 'status'}}<br>
-                السعر فى العرض: {{$subscription->quoted_price ?? 'لم يحدد'}}<br>
-                طريقة الدفع: {{$subscription->payment_method ?? 'لم تم الدفع'}}<br>
-                ملاخظات التفعيل: {{$subscription->admin_notes ?? 'لا يوجد'}}<br>
-                تاريخ الرسال عرض السعر: {{$subscription->quoted_at ?? 'لم يتم ارسال عرض السعر'}}<br>
-                شيك الدفع: {{$subscription->payment_receipt ?? 'لم يتم ارسال شيك الدفع'}}<br>
-                تاريخ السداد: {{$subscription->paid_at ?? 'لم يتم السداد'}}<br>
-                تاريخ التفعيل: {{$subscription->activated_at ?? 'لم يتم تفعيل الاشتراك'}}<br>
-                تاريخ الانتهاء: {{$subscription->expires_at ?? 'لم يتم تحديد تاريخ الانتهاء'}}<br>
-                صالح حتى: {{$subscription->expires_at ?? 'سنة من تاريخ الاشتراك'}}<br>
-                تاريخ التعليق: {{$subscription->suspended_at ?? 'لم يتم تعليق الاشتراك'}}<br>
-                تاريخ اخر تجديد: {{$subscription->renewed_at ?? 'لم يتم تجديد الاشتراك'}}<br>
-                سبب التعليق: {{$subscription->suspension_reason ?? 'لا يوجد'}}<br>
-                تاريخ الطلب: {{$subscription->created_at ?? 'غير معروف'}}<br>
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
 
-
-                
                 <div class="card-body">
-                    <div class="grid grid-cols-1 md:grid-cols-2">
-                    <div class="mb-3">
-                        <label class="form-label text-muted">بيان الاشتراك</label>
-                        <p>{{$subscription->subscription_name ?? 'No details added'}}</p>
-                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 mb-3">
+                        <div class="mb-3">
+                            <label class="form-label text-muted">بيان الاشتراك</label>
+                            <p>{{$subscription->subscription_name ?? 'No details added'}}</p>
+                        </div>
 
-                    <div class="mb-3">
-                        <label class="form-label text-muted">عدد الأجهزة </label>
-                        <p>{{$subscription->device_count ?? 'لم يتم اضافة أجهزة بعد'}}</p>
-                    </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted">عدد الأجهزة </label>
+                            <p>{{$subscription->device_count ?? 'لم يتم اضافة أجهزة بعد'}}</p>
+                        </div>
 
-                    <div class="mb-3">
-                        <label class="form-label text-muted">بداية مقترحة </label>
-                        <p>{{$subscription->proposed_start_date->format('Y-m-d') ?? 'لم يتم اضافة أجهزة بعد'}}</p>
-                    </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted">بداية مقترحة </label>
+                            <p>{{$subscription->proposed_start_date->format('Y-m-d') ?? 'لم يتم اضافة أجهزة بعد'}}</p>
+                        </div>
 
-                    <div class="mb-3">
-                        <label class="form-label text-muted">المبلغ المسدد</label>
-                        <p><strong>{{ number_format($subscription->payment->amount) }} ر.س</strong> </p>
-                    </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted">المبلغ المسدد</label>
+                            <p><strong>{{ number_format($subscription->payment->amount ?? 0) }} ر.س</strong> </p>
+                        </div>
+                        <style>
+                            img.payment-method-icon {
+                                max-height: 40px;
+                                border-radius: 8px
+                            }
+                        </style>
 
-                    {{-- Administration Area --}}
-                    <div class="mb-3">
-                        <label class="form-label text-muted">حالة الاشتراك</label>
-                        <div>
-                            @switch($subscription->status)
-                                @case('active')
-                                    <span class="badge bg-success fs-6">نشط</span>
-                                    @break
-                                @case('pending')
-                                    <span class="badge bg-warning fs-6">في الانتظار</span>
-                                    @break
-                                @case('expired')
-                                    <span class="badge bg-danger fs-6">منتهي</span>
-                                    @break
-                                @case('quoted')
-                                    <span class="badge bg-secondary fs-6">تم ارسال عرض سعر</span>
-                                    @break
-                                @case('suspended')
-                                    <span class="badge bg-secondary fs-6">معلق</span>
-                                    @break
+                        <div class="mb-3">
+                            <label class="form-label text-muted">طريقة الدفع</label>
+                            @switch($subscription->payment_method)
+                            @case('bank_transfer')
+                            <img class="payment-method-icon" src="{{asset('images/bank-transfer.png')}}" alt="">
+                            @break
+                            @case('vodafone_cash')
+                            <img class="payment-method-icon" src="{{asset('images/vf-cash.png')}}" alt="">
+                            @break
+                            @case('orange_cash')
+                            <img class="payment-method-icon" src="{{asset('images/orange-cash.png')}}" alt="">
+                            @break
+                            @case('etisalat_cash')
+                            <img class="payment-method-icon" src="{{asset('images/etisalat-cash.png')}}" alt="">
+                            @break
+                            @case('visa_card')
+                            <img class="payment-method-icon" src="{{asset('images/visa-card.png')}}" alt="">
+                            @break
+                            @default
+                            <p>غير معروف</p>
                             @endswitch
                         </div>
-                    </div>
 
-                    @if(isset($timeline['activated']) && $timeline['activated'])
-                    <div class="mb-3">
-                        <label class="form-label text-muted">تاريخ التفعيل</label>
-                        <div>
-                            <strong>{{ $timeline['activated']->format('Y/m/d') }}</strong>
-                            <small class="text-muted d-block">{{ $timeline['activated']->diffForHumans() }}</small>
+                        <div class="mb-3">
+                            <label class="form-label text-muted">الايصال</label><br>
+                            @if($subscription->payment_receipt)
+                            <button class="btn btn-primary btn-sm" onclick="window.open('{{asset('storage/' . $subscription->payment_receipt)}}', '_blank')">عرض الصورة</button>
+                            @else
+                            <p>لم يتم ارسال شيك الدفع</p>
+                            @endif
                         </div>
                     </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label text-muted">تاريخ الانتهاء</label>
-                        <div>
-                            <strong>{{ $timeline['expires']->format('Y/m/d') }}</strong>
-                            <small class="text-muted d-block">
-                                @if($timeline['days_remaining'] > 0)
-                                    <span class="text-success">باقي {{ $timeline['days_remaining'] }} يوم</span>
-                                @else
-                                    <span class="text-danger">منتهي منذ {{ abs($timeline['days_remaining']) }} يوم</span>
-                                @endif
-                            </small>
-                        </div>
-                    </div>
-                    @endif
 
-                    @if($subscription->payment)
-                    <div class="mb-3">
-                        <label class="form-label text-muted">المبلغ المدفوع</label>
-                        <div>
-                            
-                            <div class="mt-1">
-                                @switch($subscription->payment->status)
-                                    @case('verified')
-                                        <span class="badge bg-success">مؤكد</span>
-                                        @break
-                                    @case('pending_verification')
-                                        <span class="badge bg-warning">في الانتظار</span>
-                                        @break
-                                    @case('rejected')
-                                        <span class="badge bg-danger">مرفوض</span>
-                                        @break
+                    <div class="grid grid-cols-1">
+                        <label class="form-label text-muted">ملاحظات العميل</label>
+                        <p>{{ $subscription->notes ?? 'لا يوجد ملاحظات مسجلة'}} </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-8">
+            <div class="card mb-4 shadow">
+                <div class="card-header py-2">
+                    <h3 class="mb-0">ادارة الاشتراك</h3>
+                </div>
+                <div class="card-body">
+
+                    <div class="grid grid-cols-1 md:grid-cols-2">
+                        {{-- Administration Area --}}
+                        <div class="mb-3">
+                            <label class="form-label text-muted">حالة الاشتراك</label>
+                            <div>
+                                @switch($subscription->status)
+                                @case('active')
+                                <span class="badge bg-success fs-6">نشط</span>
+                                @break
+                                @case('pending')
+                                <span class="badge bg-warning fs-6">في الانتظار</span>
+                                <a href="{{route('admin.subscriptions.quote', $subscription->id)}}" class="btn btn-primary btn-sm">Quote</a>
+                                @break
+                                @case('expired')
+                                <span class="badge bg-danger fs-6">منتهي</span>
+                                @break
+                                @case('quoted')
+                                <span class="badge bg-secondary fs-6">تم ارسال عرض سعر</span>
+                                @break
+                                @case('suspended')
+                                <span class="badge bg-secondary fs-6">معلق</span>
+                                @break
                                 @endswitch
                             </div>
                         </div>
-                    </div>
-                    @endif
 
-                    <div class="mb-3">
-                        <label class="form-label text-muted">تاريخ الطلب</label>
-                        <div>
-                            <strong>{{ $subscription->created_at->format('Y/m/d H:i') }}</strong>
-                            <small class="text-muted d-block">{{ $subscription->created_at->diffForHumans() }}</small>
+                        @if(isset($timeline['activated']) && $timeline['activated'])
+                        <div class="mb-3">
+                            <label class="form-label text-muted">تاريخ التفعيل</label>
+                            <div>
+                                <strong>{{ $timeline['activated']->format('Y/m/d') }}</strong>
+                                <small class="text-muted d-block">{{ $timeline['activated']->diffForHumans() }}</small>
+                            </div>
                         </div>
-                    </div>
 
-                    @if($subscription->admin_notes)
-                    <div class="mb-3">
-                        <label class="form-label text-muted">ملاحظات إدارية</label>
-                        <div class="bg-light p-2 rounded">
-                            {{ $subscription->admin_notes }}
+                        <div class="mb-3">
+                            <label class="form-label text-muted">تاريخ الانتهاء</label>
+                            <div>
+                                <strong>{{ $timeline['expires']->format('Y/m/d') }}</strong>
+                                <small class="text-muted d-block">
+                                    @if($timeline['days_remaining'] > 0)
+                                    <span class="text-success">باقي {{ $timeline['days_remaining'] }} يوم</span>
+                                    @else
+                                    <span class="text-danger">منتهي منذ {{ abs($timeline['days_remaining']) }} يوم</span>
+                                    @endif
+                                </small>
+                            </div>
                         </div>
-                    </div>
-                    @endif
+                        @endif
 
-                    <!-- Action Buttons -->
-                    <div class="d-grid gap-2 mt-4">
-                        @if($subscription->status === 'pending')
+                        @if($subscription->payment)
+                        <div class="mb-3">
+                            <label class="form-label text-muted">المبلغ المدفوع</label>
+                            <div>
+
+                                <div class="mt-1">
+                                    @switch($subscription->payment->status)
+                                    @case('verified')
+                                    <span class="badge bg-success">مؤكد</span>
+                                    @break
+                                    @case('pending_verification')
+                                    <span class="badge bg-warning">في الانتظار</span>
+                                    @break
+                                    @case('rejected')
+                                    <span class="badge bg-danger">مرفوض</span>
+                                    @break
+                                    @endswitch
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+
+                        <div class="mb-3">
+                            <label class="form-label text-muted">تاريخ الطلب</label>
+                            <div>
+                                <strong>{{ $subscription->created_at->format('Y/m/d H:i') }}</strong>
+                                <small class="text-muted d-block">{{ $subscription->created_at->diffForHumans() }}</small>
+                            </div>
+                        </div>
+
+                        @if($subscription->admin_notes)
+                        <div class="mb-3">
+                            <label class="form-label text-muted">ملاحظات إدارية</label>
+                            <div class="bg-light p-2 rounded">
+                                {{ $subscription->admin_notes }}
+                            </div>
+                        </div>
+                        @endif
+
+                        <!-- Action Buttons -->
+                        <div class="d-grid gap-2 mt-4">
+                            @if($subscription->status === 'pending')
                             <button class="btn btn-success" onclick="showActivateModal()">
                                 <i class="fas fa-play"></i> تفعيل الاشتراك
                             </button>
-                        @endif
-                        
-                        @if($subscription->status === 'active')
+                            @endif
+
+                            @if($subscription->status === 'active')
                             <button class="btn btn-warning" onclick="showSuspendModal()">
                                 <i class="fas fa-pause"></i> تعليق الاشتراك
                             </button>
                             <button class="btn btn-info" onclick="showRenewModal()">
                                 <i class="fas fa-sync"></i> تجديد الاشتراك
                             </button>
-                        @endif
-                        
-                        @if($subscription->status === 'suspended')
+                            @endif
+
+                            @if($subscription->status === 'suspended')
                             <button class="btn btn-success" onclick="showActivateModal()">
                                 <i class="fas fa-play"></i> إعادة تفعيل
                             </button>
-                        @endif
-                    </div>
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>
@@ -214,7 +232,7 @@
                             <small>الأجهزة النشطة</small>
                         </div>
                     </div>
-                    
+
                     @if($device_stats['by_type']->count() > 0)
                     <hr>
                     <div class="mb-2"><strong>توزيع الأجهزة:</strong></div>
@@ -261,7 +279,7 @@
                                             <div>
                                                 <strong>{{ $device->device_name }}</strong>
                                                 @if($device->model)
-                                                    <br><small class="text-muted">{{ $device->model }}</small>
+                                                <br><small class="text-muted">{{ $device->model }}</small>
                                                 @endif
                                             </div>
                                         </div>
@@ -270,49 +288,41 @@
                                     <td>
                                         <code>{{ $device->serial_number }}</code>
                                         @if($device->ios_version)
-                                            <br><small class="text-muted">iOS {{ $device->ios_version }}</small>
+                                        <br><small class="text-muted">iOS {{ $device->ios_version }}</small>
                                         @endif
                                     </td>
                                     <td>
                                         @if($device->is_active)
-                                            <span class="badge bg-success">نشط</span>
+                                        <span class="badge bg-success">نشط</span>
                                         @else
-                                            <span class="badge bg-secondary">معلق</span>
+                                        <span class="badge bg-secondary">معلق</span>
                                         @endif
                                     </td>
                                     <td>
                                         @if($device->activated_at)
-                                            {{ $device->activated_at->format('Y/m/d') }}
-                                            <br><small class="text-muted">{{ $device->activated_at->diffForHumans() }}</small>
+                                        {{ $device->activated_at->format('Y/m/d') }}
+                                        <br><small class="text-muted">{{ $device->activated_at->diffForHumans() }}</small>
                                         @else
-                                            <span class="text-muted">غير مفعل</span>
+                                        <span class="text-muted">غير مفعل</span>
                                         @endif
                                     </td>
                                     <td>
                                         <div class="btn-group" role="group" aria-label="Device Actions">
                                             @if($device->is_active)
-                                                <button type="button" class="btn btn-sm btn-outline-warning" 
-                                                        onclick="suspendDevice({{ $device->id }})" 
-                                                        title="تعليق الجهاز">
-                                                    <i class="fas fa-pause"></i>
-                                                </button>
+                                            <button type="button" class="btn btn-sm btn-outline-warning" onclick="suspendDevice({{ $device->id }})" title="تعليق الجهاز">
+                                                <i class="fas fa-pause"></i>
+                                            </button>
                                             @else
-                                                <button type="button" class="btn btn-sm btn-outline-success" 
-                                                        onclick="activateDevice({{ $device->id }})" 
-                                                        title="تفعيل الجهاز">
-                                                    <i class="fas fa-play"></i>
-                                                </button>
+                                            <button type="button" class="btn btn-sm btn-outline-success" onclick="activateDevice({{ $device->id }})" title="تفعيل الجهاز">
+                                                <i class="fas fa-play"></i>
+                                            </button>
                                             @endif
-                                            
-                                            <button type="button" class="btn btn-sm btn-outline-primary" 
-                                                    onclick="editDevice({{ $device->id }})" 
-                                                    title="تعديل الجهاز">
+
+                                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="editDevice({{ $device->id }})" title="تعديل الجهاز">
                                                 <i class="fas fa-edit"></i>
                                             </button>
-                                            
-                                            <button type="button" class="btn btn-sm btn-outline-danger" 
-                                                    onclick="removeDevice({{ $device->id }})" 
-                                                    title="حذف الجهاز">
+
+                                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeDevice({{ $device->id }})" title="حذف الجهاز">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </div>
@@ -352,8 +362,7 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label">اسم الجهاز *</label>
-                                <input type="text" class="form-control" name="device_name" required
-                                       placeholder="مثال: iPhone الخاص بأحمد">
+                                <input type="text" class="form-control" name="device_name" required placeholder="مثال: iPhone الخاص بأحمد">
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -372,22 +381,19 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label">الرقم التسلسلي *</label>
-                                <input type="text" class="form-control" name="serial_number" required
-                                       placeholder="مثال: FCDP123ABC456">
+                                <input type="text" class="form-control" name="serial_number" required placeholder="مثال: FCDP123ABC456">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label">الموديل</label>
-                                <input type="text" class="form-control" name="model"
-                                       placeholder="مثال: iPhone 14 Pro Max">
+                                <input type="text" class="form-control" name="model" placeholder="مثال: iPhone 14 Pro Max">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label">إصدار iOS</label>
-                                <input type="text" class="form-control" name="ios_version"
-                                       placeholder="مثال: 17.2.1">
+                                <input type="text" class="form-control" name="ios_version" placeholder="مثال: 17.2.1">
                             </div>
                         </div>
                     </div>
@@ -447,7 +453,7 @@
 
 @section('scripts')
 <script>
-const subscriptionId = {{ $subscription->id }};
+    const subscriptionId = {{ $subscription->id }};
 
 $(document).ready(function() {
     // Add device form
@@ -602,13 +608,13 @@ function showAlert(type, message) {
 
 @php
 function getDeviceIcon($deviceType) {
-    return match($deviceType) {
-        'iPhone' => 'fa-mobile-alt',
-        'iPad' => 'fa-tablet-alt',
-        'Mac' => 'fa-laptop',
-        'Apple TV' => 'fa-tv',
-        'Apple Watch' => 'fa-clock',
-        default => 'fa-mobile-alt'
-    };
+return match($deviceType) {
+'iPhone' => 'fa-mobile-alt',
+'iPad' => 'fa-tablet-alt',
+'Mac' => 'fa-laptop',
+'Apple TV' => 'fa-tv',
+'Apple Watch' => 'fa-clock',
+default => 'fa-mobile-alt'
+};
 }
 @endphp
