@@ -19,6 +19,9 @@
     <!-- Arabic Font -->
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
 
+    <!-- Popper.js for Tooltips & Popovers -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+
     <link href="{{ asset('css/custom-styles.css') }}" rel="stylesheet">
     
     <style>
@@ -140,6 +143,18 @@
             }
         });
         
+        // Initialize Tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Initialize Popovers
+        const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+        const popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+            return new bootstrap.Popover(popoverTriggerEl);
+        });
+        
         // Auto-hide alerts after 5 seconds
         setTimeout(function() {
             $('.alert').fadeOut('slow');
@@ -155,10 +170,24 @@
             button.html(originalText);
             button.prop('disabled', false);
         }
+        
+        // Toggle helper function
+        function toggleElement(selector) {
+            $(selector).toggleClass('show');
+        }
+        
+        // Show element
+        function showElement(selector) {
+            $(selector).addClass('show');
+        }
+        
+        // Hide element
+        function hideElement(selector) {
+            $(selector).removeClass('show');
+        }
     </script>
     
     @stack('scripts')
-    @yield('scripts')
     
 </body>
 </html>

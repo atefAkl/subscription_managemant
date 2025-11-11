@@ -1,91 +1,10 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>تفاصيل العميل - {{ $client->name }}</title>
-    
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
-    
-    <!-- Custom Styles -->
-    <link href="{{ asset('css/custom-styles.css') }}" rel="stylesheet">
-    
-    <style>
-        body {
-            font-family: 'Tajawal', sans-serif;
-        }
-    </style>
-</head>
-<body class="bg-gray-100 min-h-screen">
-    <!-- Navigation -->
-    <nav class="bg-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 flex items-center">
-                        <a href="{{ route('admin.clients.index') }}" class="text-xl font-bold text-blue-600">
-                            <i class="fas fa-arrow-left ml-2"></i>
-                            تفاصيل العميل: {{ $client->name }}
-                        </a>
-                    </div>
-                </div>
-                
-                <div class="flex items-center space-x-4 space-x-reverse">
-                    <span class="text-gray-700">{{ auth()->user()->name }}</span>
-                    <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">مدير</span>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Main Content -->
-    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <!-- Breadcrumb -->
-        <nav class="flex mb-6" aria-label="Breadcrumb">
-            <ol class="inline-flex items-center space-x-1 md:space-x-3 space-x-reverse">
-                <li class="inline-flex items-center">
-                    <a href="{{ route('admin.dashboard') }}" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
-                        <i class="fas fa-home ml-1"></i>
-                        الرئيسية
-                    </a>
-                </li>
-                <li>
-                    <div class="flex items-center">
-                        <i class="fas fa-chevron-left text-gray-400 mx-1"></i>
-                        <a href="{{ route('admin.clients.index') }}" class="text-sm font-medium text-gray-700 hover:text-blue-600">إدارة العملاء</a>
-                    </div>
-                </li>
-                <li>
-                    <div class="flex items-center">
-                        <i class="fas fa-chevron-left text-gray-400 mx-1"></i>
-                        <span class="text-sm font-medium text-gray-500">{{ $client->name }}</span>
-                    </div>
-                </li>
-            </ol>
-        </nav>
-
-        @if(session('success'))
-            <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
-                <i class="fas fa-check-circle ml-1"></i>
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-                <i class="fas fa-exclamation-circle ml-1"></i>
-                {{ session('error') }}
-            </div>
-        @endif
-
+@extends('layouts.app')
+@section('content')
+<x-breadcrumb :items="[
+    ['label' => 'لوحة التحكم', 'url' => route('admin.dashboard')],
+    ['label' => 'إدارة العملاء', 'url' => route('admin.clients.index')],
+    ['label' => 'عرض بيانات: ' . $client->name, 'url' => route('admin.clients.show', $client)]   
+]" />
         <!-- Client Header -->
         <div class="bg-white shadow-xl rounded-lg mb-6">
             <div class="px-6 py-8">
@@ -105,7 +24,9 @@
                                 @if($client->clientProfile?->subscription_status === 'active') bg-green-100 text-green-800
                                 @elseif($client->clientProfile?->subscription_status === 'trial') bg-yellow-100 text-yellow-800
                                 @elseif($client->clientProfile?->subscription_status === 'expired') bg-red-100 text-red-800
-                                @else bg-gray-100 text-gray-800 @endif">
+                                @else bg-gray-100 text-gray-800 @endif"
+                                data-bs-toggle="tooltip"
+                                data-bs-title="حالة الاشتراك">
                                 <i class="fas fa-circle text-xs ml-1"></i>
                                 {{ $client->clientProfile?->getSubscriptionStatusText() ?? 'غير محدد' }}
                             </span>
@@ -113,17 +34,23 @@
                                 @if($client->clientProfile?->subscription_type === 'basic') bg-gray-100 text-gray-800
                                 @elseif($client->clientProfile?->subscription_type === 'premium') bg-blue-100 text-blue-800
                                 @elseif($client->clientProfile?->subscription_type === 'enterprise') bg-purple-100 text-purple-800
-                                @else bg-gray-100 text-gray-800 @endif">
+                                @else bg-gray-100 text-gray-800 @endif"
+                                data-bs-toggle="tooltip"
+                                data-bs-title="نوع الاشتراك">
                                 <i class="fas fa-tag ml-1"></i>
                                 {{ $client->clientProfile?->getSubscriptionTypeText() ?? 'غير محدد' }}
                             </span>
                         </div>
                     </div>
                     <div class="flex space-x-2 space-x-reverse">
-                        <a href="{{ route('admin.clients.edit', $client) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors">
+                        <button onclick="toggleClientStatus()" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                            <i class="fas fa-power-off ml-1"></i>
+                            {{ $client->status === 'active' ? 'إيقاف' : 'تفعيل' }} العميل
+                        </button>
+                        {{-- <a href="{{ route('admin.clients.edit', $client) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors">
                             <i class="fas fa-edit ml-1"></i>
                             تعديل
-                        </a>
+                        </a> --}}
                         <button onclick="deleteClient({{ $client->id }})" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition-colors">
                             <i class="fas fa-trash ml-1"></i>
                             حذف
@@ -268,20 +195,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Client Actions -->
-                    <div class="mt-6 pt-4 border-t border-gray-100">
-                        <div class="flex space-x-3 space-x-reverse">
-                            <button onclick="editClient()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
-                                <i class="fas fa-edit ml-1"></i>
-                                تعديل العميل
-                            </button>
-                            <button onclick="toggleClientStatus()" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
-                                <i class="fas fa-power-off ml-1"></i>
-                                {{ $client->status === 'active' ? 'إيقاف' : 'تفعيل' }} العميل
-                            </button>
-                        </div>
-                    </div>
                 </div>
             </div>
 
@@ -290,19 +203,41 @@
                 <div class="px-6 py-4 border-b border-gray-200">
                     <h3 class="text-lg font-medium text-gray-900">
                         <i class="fas fa-clipboard-list ml-1"></i>
-                        الاشتراكات تحت الطلب
+                        الاشتراكات المعلقة
                     </h3>
                 </div>
                 <div class="px-6 py-4">
+                    <div class="row">
                     @forelse($client->subscriptionRequests as $ssReq)
                         <!-- Subscription Card -->
-
+                        <div class="col col-md-6">
+                            <div class="card shadow mt-2">
+                                <div class="card-body">
+                                    <div>
+                                        <p>نوع الاشتراك: {{ $ssReq->subscription_type }}</p>
+                                        <p>عدد الأجهزة: {{ $ssReq->device_count ?? 'غير محدد' }}</p>
+                                        <p>المبلغ المحدد: {{ $ssReq->quoted_amount ? number_format($ssReq->quoted_amount) . ' جنيه' : 'لم يُحدد بعد' }}</p>
+                                        <p>طريقة الدفع المفضلة: {{ $ssReq->preferred_payment_method ?? 'غير محدد' }}</p>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="d-flex justify-content-between">
+                                        <a href="" class="btn btn-sm">Accept</a>
+                                        <a href="" class="btn btn-sm">Receipt</a>
+                                        <a href="" class="btn btn-sm">Refuse</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     @empty
-                      <p class="text-center text-gray-500 py-8">
-                          <i class="fas fa-inbox text-4xl mb-4"></i>
-                          لا توجد اشتراكات تحت الطلب حالياً.
-                      </p>
+                       <div class="card">
+                            <div class="card-body">
+                                <i class="fas fa-inbox text-2xl mb-2"></i>
+                                لا توجد اشتراكات تحت الطلب حالياً.
+                            </div>
+                        </div>
                     @endforelse
+                    </div>
                 </div>
             </div>
         </div>
@@ -323,7 +258,7 @@
                         <div class="flex justify-between items-start mb-4">
                             <div>
                                 <h4 class="text-lg font-medium text-gray-900">{{ $subscription->getSubscriptionTypeText() }}</h4>
-                                <p class="text-sm text-gray-500">اشتراك رقم #{{ $subscription->id }}</p>
+                                <p class="text-sm text-gray-500">{{ $subscription->serial_number }}</p>
                             </div>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
                                 @if($subscription->subscription_status === 'active') bg-green-100 text-green-800
@@ -1336,6 +1271,4 @@
             </div>
         </div>
     </div>
-
-</body>
-</html>
+@endsection 

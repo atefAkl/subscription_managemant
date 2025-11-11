@@ -37,6 +37,11 @@ Route::get('/test-simple', function () {
     return view('test-simple');
 })->name('test.simple');
 
+// Examples & Documentation Pages
+Route::get('/examples/tooltips-toggles', function () {
+    return view('examples.tooltips-toggles');
+})->name('examples.tooltips-toggles');
+
 // Authentication Routes
 Route::middleware('guest')->group(function () {
     // Login

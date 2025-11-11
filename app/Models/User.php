@@ -93,7 +93,7 @@ class User extends Authenticatable
      */
     public function subscriptionRequests(): HasMany
     {
-        return $this->hasMany(\App\Models\SubscriptionRequest::class);
+        return $this->hasMany(SubscriptionRequest::class);
     }
 
     /**
@@ -101,7 +101,7 @@ class User extends Authenticatable
      */
     public function subscriptions(): HasMany
     {
-        return $this->hasMany(\App\Models\Subscription::class);
+        return $this->hasMany(Subscription::class);
     }
 
     /**
