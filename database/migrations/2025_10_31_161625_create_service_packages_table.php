@@ -12,6 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('service_packages', function (Blueprint $table) {
+            $table->engine('innodb');
             $table->id();
             $table->string('name', 45)->nullable(false)->unique();
             $table->text('description', 255);

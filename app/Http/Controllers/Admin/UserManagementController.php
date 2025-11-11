@@ -57,6 +57,7 @@ class UserManagementController extends Controller
   {
     $validated = $request->validate([
       'name'            => 'required|string|max:255',
+      'user_name'            => 'required|string|max:30',
       'email'           => 'required|string|email|max:255|unique:users',
       'password'        => 'required|string|min:8|confirmed',
       'phone'           => 'nullable|string|max:16',
@@ -74,6 +75,7 @@ class UserManagementController extends Controller
     try {
       $user = User::create([
         'name' => $validated['name'],
+        'user_name' => $validated['user_name'],
         'email' => $validated['email'],
         'password' => Hash::make($validated['password']),
         'role' => 'admin', // Always admin for this controller
@@ -96,7 +98,7 @@ class UserManagementController extends Controller
       DB::commit();
 
       return redirect()->route('admin.users.index')
-        ->with('success', 'تم إنشاء المدير بنجاح - رقم الموظف: ' . $user->employee_number);
+        ->with('success', 'تم إنشاء المدير بنجاح - رقم الموظف: ' . $user->serial_number);
     } catch (\Exception $e) {
       DB::rollback();
       return redirect()->back()->withInput()->withErrors(['error' => 'فشل إنشاء المستخدم: ' . $e->getMessage()]);

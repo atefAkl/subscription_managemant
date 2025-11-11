@@ -25,10 +25,12 @@ class UserFactory extends Factory
     {
         return [
             'name' => fake()->name(),
+            'user_name' => 'user_' . rand(1000, 9999),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'serial_number' => Str::random(10),
             'role' => fake()->randomElement(['admin', 'client']),
         ];
     }
@@ -38,7 +40,7 @@ class UserFactory extends Factory
      */
     public function unverified(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'email_verified_at' => null,
         ]);
     }
@@ -48,7 +50,7 @@ class UserFactory extends Factory
      */
     public function admin(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'role' => 'admin',
         ]);
     }
@@ -58,7 +60,7 @@ class UserFactory extends Factory
      */
     public function client(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'role' => 'client',
         ]);
     }

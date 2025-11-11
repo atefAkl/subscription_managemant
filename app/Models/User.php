@@ -20,13 +20,15 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'user_name',
         'email',
         'password',
         'role',
         'phone',
         'address',
         'notes',
-        'employee_number',
+        'access_level',
+        'serial_number',
         'is_app_admin',
         'last_login_at',
     ];
@@ -171,11 +173,13 @@ class User extends Authenticatable
     /**
      * Generate employee number for admin users
      */
-    public static function generateEmployeeNumber(): string
+    public static function generateSerialNumber($user): string
     {
+        $prefix = $user->role == 'admin' ? 'EMP' : 'CUST';
         do {
-            $number = 'EMP' . str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
-        } while (self::where('employee_number', $number)->exists());
+
+            $number = $prefix . str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
+        } while (self::where('serial_number', $number)->exists());
 
         return $number;
     }
@@ -188,9 +192,7 @@ class User extends Authenticatable
         parent::boot();
 
         static::creating(function ($user) {
-            if ($user->role === 'admin' && !$user->employee_number) {
-                $user->employee_number = self::generateEmployeeNumber();
-            }
+            $user->serial_number = self::generateSerialNumber($user);
         });
     }
 }

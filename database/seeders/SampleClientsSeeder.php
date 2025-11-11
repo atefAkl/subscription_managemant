@@ -16,15 +16,17 @@ class SampleClientsSeeder extends Seeder
     public function run(): void
     {
         // Create Client 1
-        $client1 = User::create([
-            'name' => 'أحمد محمد علي',
-            'email' => 'ahmed@test.com',
-            'password' => bcrypt('password'),
-            'role' => 'client',
-            'phone' => '+201234567890'
-        ]);
+        $client1 = User::firstOrCreate(
+            [ 'email' => 'ahmed@test.com' ],
+            [
+                'name' => 'أحمد محمد علي',
+                'password' => bcrypt('password'),
+                'role' => 'client',
+                'phone' => '+201234567890'
+            ]
+        );
 
-        $profile1 = ClientProfile::create([
+        $profile1 = ClientProfile::firstOrCreate([
             'user_id' => $client1->id,
             'subscription_type' => 'premium',
             'subscription_status' => 'active',
@@ -37,11 +39,13 @@ class SampleClientsSeeder extends Seeder
         ]);
 
         // Create devices for Client 1
-        ClientDevice::create([
-            'user_id' => $client1->id,
-            'subscription_id' => $profile1->id,
-            'device_name' => 'iPhone 15 Pro - أحمد',
-            'device_serial' => 'F2L12345ABC',
+        ClientDevice::updateOrCreate(
+            ['device_serial' => 'F2L12345ABC'],
+            [
+                'user_id' => $client1->id,
+                'subscription_id' => $profile1->id,
+                'device_name' => 'iPhone 15 Pro - أحمد',
+                'device_serial' => 'F2L12345ABC',
             'device_type' => 'iphone',
             'device_model' => 'iPhone 15 Pro',
             'ios_version' => '17.1',
@@ -50,11 +54,13 @@ class SampleClientsSeeder extends Seeder
             'last_connection' => now()->subMinutes(15),
         ]);
 
-        ClientDevice::create([
-            'user_id' => $client1->id,
-            'subscription_id' => $profile1->id,
-            'device_name' => 'iPad Pro - أحمد',
-            'device_serial' => 'DMY67890XYZ',
+        ClientDevice::updateOrCreate(
+            ['device_serial' => 'DMY67890XYZ'],
+            [
+                'user_id' => $client1->id,
+                'subscription_id' => $profile1->id,
+                'device_name' => 'iPad Pro - أحمد',
+                'device_serial' => 'DMY67890XYZ',
             'device_type' => 'ipad',
             'device_model' => 'iPad Pro 12.9-inch',
             'ios_version' => '17.1',
@@ -64,15 +70,17 @@ class SampleClientsSeeder extends Seeder
         ]);
 
         // Create Client 2
-        $client2 = User::create([
-            'name' => 'فاطمة سالم',
-            'email' => 'fatma@test.com',
-            'password' => bcrypt('password'),
-            'role' => 'client',
-            'phone' => '+201098765432'
-        ]);
+        $client2 = User::firstOrCreate(
+            [ 'email' => 'fatma@test.com' ],
+            [
+                'name' => 'فاطمة سالم',
+                'password' => bcrypt('password'),
+                'role' => 'client',
+                'phone' => '+201098765432'
+            ]
+        );
 
-        $profile2 = ClientProfile::create([
+        $profile2 = ClientProfile::firstOrCreate([
             'user_id' => $client2->id,
             'subscription_type' => 'basic',
             'subscription_status' => 'active',
@@ -84,25 +92,31 @@ class SampleClientsSeeder extends Seeder
             'billing_cycle' => 'monthly'
         ]);
 
-        ClientDevice::create([
-            'user_id' => $client2->id,
-            'subscription_id' => $profile2->id,
-            'device_name' => 'iPhone 14 - فاطمة',
-            'device_serial' => 'F1K98765DEF',
-            'device_type' => 'iphone',
-            'device_model' => 'iPhone 14',
-            'ios_version' => '17.0',
-            'status' => 'active',
-            'activation_date' => now()->subDays(12),
-            'last_connection' => now()->subMinutes(5),
+        ClientDevice::updateOrCreate(
+            ['device_serial' => 'F1K98765DEF'],
+            [
+                'user_id' => $client2->id,
+                'subscription_id' => $profile2->id,
+                'device_name' => 'iPhone 14 - فاطمة',
+                'device_serial' => 'F1K98765DEF',
+                'device_type' => 'iphone',
+                'device_model' => 'iPhone 14',
+                'ios_version' => '17.0',
+                'status' => 'active',
+                'activation_date' => now()->subDays(12),
+                'last_connection' => now()->subMinutes(5),
+            ]
+        );
         ]);
 
         // Create Admin User
-        $admin = User::create([
-            'name' => 'مدير النظام',
-            'email' => 'admin@test.com',
-            'password' => bcrypt('password'),
-            'role' => 'admin'
-        ]);
+        $admin = User::firstOrCreate(
+            [ 'email' => 'admin@test.com' ],
+            [
+                'name' => 'مدير النظام',
+                'password' => bcrypt('password'),
+                'role' => 'admin'
+            ]
+        );
     }
 }

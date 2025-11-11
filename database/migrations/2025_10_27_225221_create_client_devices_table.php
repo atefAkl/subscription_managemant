@@ -12,6 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('client_devices', function (Blueprint $table) {
+            $table->engine('innodb');
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->unsignedBigInteger('subscription_id')->nullable();

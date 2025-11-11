@@ -12,8 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('package_feature_values', function (Blueprint $table) {
+            $table->engine('innodb');
             $table->id();
-            $table->foreignId('package_id')->constrained('packages')->cascadeOnDelete();
+            $table->foreignId('package_id')->constrained('service_packages')->cascadeOnDelete();
             $table->foreignId('package_feature_id')->constrained('package_features')->cascadeOnDelete();
             $table->string('value', 45)->nullable(false);
             $table->timestamps();

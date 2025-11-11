@@ -12,6 +12,7 @@ return new class extends Migration
   public function up(): void
   {
     Schema::create('subscriptions', function (Blueprint $table) {
+      $table->engine('innodb');
       $table->id();
       $table->foreignId('user_id')->constrained()->onDelete('cascade');
       $table->foreignId('subscription_request_id')->nullable()->constrained()->onDelete('set null');
