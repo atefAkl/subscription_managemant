@@ -9,8 +9,11 @@ use App\Http\Controllers\Client\DeviceController;
 use App\Http\Controllers\Client\PaymentController;
 use App\Http\Controllers\Client\StatisticsController;
 use App\Http\Controllers\Admin\SubscriptionRequestController;
+use App\Http\Controllers\Admin\GroupsManagementController;
 use App\Http\Controllers\Admin\DeviceController as AdminDeviceController;
+use App\Http\Controllers\Admin\GroupsItemsManagementController;
 use App\Http\Controllers\Admin\UserManagementController;
+use App\Http\Controllers\Admin\keyManagementController;
 use App\Http\Controllers\ServicePackageController;
 use Illuminate\Support\Facades\Route;
 
@@ -87,6 +90,8 @@ Route::middleware('auth')->group(function () {
             Route::get('/{user}/permissions',   [UserManagementController::class, 'permissions'])->name('permissions');
         });
 
+
+
         // Client Management Module (Clients only)
         Route::prefix('clients')->name('clients.')->group(function () {
             Route::get('/',                                         [ClientManagementController::class, 'index'])->name('index');
@@ -109,6 +114,15 @@ Route::middleware('auth')->group(function () {
             Route::delete('/{client}/devices/{device}',             [ClientManagementController::class, 'deleteDevice'])->name('devices.destroy');
             Route::post('/{client}/devices/{device}/toggle',        [ClientManagementController::class, 'toggleDeviceStatus'])->name('devices.toggle');
             Route::get('/statistics/dashboard',                     [ClientManagementController::class, 'statistics'])->name('statistics');
+
+            // Keys Management
+            Route::prefix('keys')->name('keys.')->group(function () {
+                Route::get('/',                                         [KeyManagementController::class, 'index'])->name('index');
+                Route::post('/generate',                                [KeyManagementController::class, 'store'])->name('generate');
+                Route::put('/{key}',                                    [KeyManagementController::class, 'update'])->name('delete');
+                Route::get('/{key}',                                    [KeyManagementController::class, 'show'])->name('delete');
+                Route::delete('/{key}',                                 [KeyManagementController::class, 'destroy'])->name('delete');
+            });
         });
 
         // System Settings Module
@@ -120,6 +134,18 @@ Route::middleware('auth')->group(function () {
             Route::post('/create-backup', [\App\Http\Controllers\Admin\SystemSettingsController::class, 'createBackup'])->name('create-backup');
             Route::get('/health-check', [\App\Http\Controllers\Admin\SystemSettingsController::class, 'healthCheck'])->name('health-check');
             Route::get('/system-stats', [\App\Http\Controllers\Admin\SystemSettingsController::class, 'getSystemStats'])->name('system-stats');
+
+            // groups Management
+            Route::prefix('groups')->name('groups.')->group(function () {
+                Route::get('/',                                         [GroupsManagementController::class, 'index'])->name('index');
+                Route::post('/generate',                                [GroupsManagementController::class, 'store'])->name('store');
+                Route::put('/{group}',                                  [GroupsManagementController::class, 'update'])->name('update');
+                Route::get('/{group}',                                  [GroupsManagementController::class, 'show'])->name('show');
+                Route::delete('/{group}',                               [GroupsManagementController::class, 'destroy'])->name('destroy');
+                Route::post('/{group}/items',                           [GroupsItemsManagementController::class, 'store'])->name('items.store');
+                Route::put('/groups/items/{id}',                        [GroupsItemsManagementController::class, 'update'])->name('items.update');
+                Route::delete('/groups/items/{id}/delete',              [GroupsItemsManagementController::class, 'delete'])->name('items.delete');
+            });
         });
 
         // Statistics Module
