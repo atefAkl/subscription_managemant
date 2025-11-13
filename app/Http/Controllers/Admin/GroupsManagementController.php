@@ -38,4 +38,41 @@ class GroupsManagementController extends Controller
     {
         return $group ?  AjaxResponse::success($group->with('group_items')->first())->withMessage('Group fetched successfully')->send() : AjaxResponse::notFound('Group not found')->withMessage('Group not found')->send();
     }
+
+    /* 
+    * Update a group
+    */
+    public function update(Request $request)
+    {
+        //
+        $group = Group::find($request->group_id);
+
+        $validated = $request->validate([
+            'name'          => 'required|string|max:255',
+            'description'   => 'nullable|string|max:255',
+        ]);
+        //return $validated;
+        try {
+            $group->update($validated);
+            return redirect()->back()->with('success', 'تم تحديث بيانات المجموعة بنجاح');
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()->with('error', 'فشات عملية التحديث بسبب: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Delete a group and related group items
+     */
+    public function destroy(Group $group)
+    {
+        if (!$group) {
+            return redirect()->back()->with('error', 'Group not found');
+        }
+        try {
+            $group->delete();
+            return redirect()->back()->with('success', 'Group & related group items has been deleted successfully');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to delete group: ' . $e->getMessage());
+        }
+    }
 }

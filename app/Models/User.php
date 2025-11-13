@@ -27,6 +27,7 @@ class User extends Authenticatable
         'phone',
         'address',
         'notes',
+        'status',
         'access_level',
         'serial_number',
         'is_app_admin',
@@ -56,6 +57,11 @@ class User extends Authenticatable
             'last_login_at' => 'datetime',
             'is_app_admin' => 'boolean',
         ];
+    }
+
+    public static function statuses()
+    {
+        return ['active', 'blocked', 'pending'];
     }
 
     /**
@@ -177,7 +183,6 @@ class User extends Authenticatable
     {
         $prefix = $user->role == 'admin' ? 'EMP' : 'CUST';
         do {
-
             $number = $prefix . str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
         } while (self::where('serial_number', $number)->exists());
 
@@ -190,7 +195,6 @@ class User extends Authenticatable
     protected static function boot()
     {
         parent::boot();
-
         static::creating(function ($user) {
             $user->serial_number = self::generateSerialNumber($user);
         });

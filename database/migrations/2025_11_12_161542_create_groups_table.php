@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name', 45)->unique();
             $table->string('description')->nullable();
             $table->timestamps();
+            $table->engine('InnoDB');
         });
     }
 

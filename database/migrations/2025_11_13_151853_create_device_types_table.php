@@ -11,12 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('group_items', function (Blueprint $table) {
+        Schema::create('device_types', function (Blueprint $table) {
             $table->engine('InnoDB');
             $table->id();
-            $table->foreignId('group_id')->constrained()->onDelete('cascade');
-            $table->string('name', 45);
-            $table->string('description')->nullable();
+            $table->enum('device_type', ['iPhone', 'iPad', 'Mac', 'Apple Watch', 'Apple TV'])->default('iPhone');
+            $table->string('model', 100);
+            $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
+            $table->foreignId('updated_by')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -26,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('group_items');
+        Schema::dropIfExists('device_types');
     }
 };

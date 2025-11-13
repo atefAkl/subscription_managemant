@@ -1,64 +1,72 @@
 @extends('layouts.app')
 @section('content')
 
-    <x-breadcrumb :items="[
+<x-breadcrumb :items="[
         ['label' => 'لوحة الإدارة', 'url' => route('admin.dashboard')],
         ['label' => 'الإعدادات', 'url' => ''],
     ]" />
-    <!-- Main Content --> 
-        <!-- Settings Cards Grid -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+<!-- Main Content -->
+<!-- Settings Cards Grid -->
+<div class="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-6">
 
-            <div class="shadow-sm rounded-lg overflow-hidden btn btn-primary py-12">
-                <a class="p-6" href="{{route('admin.settings.groups.index')}}">{{ __('إدارة المفاتيح') }}</a>
-            </div>
-            
+    <div class="shadow-sm rounded-lg overflow-hidden btn btn-primary py-12">
+        <a class="p-6" href="{{route('admin.settings.groups.index')}}">{{ __('إدارة المجموعات') }}</a>
+    </div>
 
-        </div>
+    <div class="shadow-sm rounded-lg overflow-hidden btn btn-primary py-12">
+        <a class="p-6" href="{{route('admin.keys.index')}}">{{ __('إدارة المفاتيح') }}</a>
+    </div>
 
-        <!-- Save Button -->
-        <div class="mt-8 text-center">
-            <button class="bg-blue-600 hover:bg-blue-700 text-white py-3 px-8 rounded-lg font-medium text-lg transition-colors shadow-lg">
-                <i class="fas fa-save ml-2"></i>
-                حفظ جميع الإعدادات
-            </button>
-        </div>
-    <script>
-        // Setup CSRF token for all AJAX requests
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        });
+    <div class="shadow-sm rounded-lg overflow-hidden btn btn-primary py-12">
+        <a class="p-6" href="{{route('admin.settings.devices.types.index')}}">{{ __('ادارة الأجهزة') }}</a>
+    </div>
 
-        function toggleSetting(element) {
-            const isEnabled = element.classList.contains('bg-indigo-600');
-            
-            if (isEnabled) {
-                // Disable
-                element.classList.remove('bg-indigo-600');
-                element.classList.add('bg-gray-200');
-                element.querySelector('span').classList.remove('translate-x-5');
-                element.querySelector('span').classList.add('translate-x-0');
-            } else {
-                // Enable
-                element.classList.remove('bg-gray-200');
-                element.classList.add('bg-indigo-600');
-                element.querySelector('span').classList.remove('translate-x-0');
-                element.querySelector('span').classList.add('translate-x-5');
-            }
+
+</div>
+
+<!-- Save Button -->
+<div class="mt-8 text-center">
+    <button class="bg-blue-600 hover:bg-blue-700 text-white py-3 px-8 rounded-lg font-medium text-lg transition-colors shadow-lg">
+        <i class="fas fa-save ml-2"></i>
+        حفظ جميع الإعدادات
+    </button>
+</div>
+<script>
+    // Setup CSRF token for all AJAX requests
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
+    });
 
-        // Auto-save indicators
-        $(document).ready(function() {
-            $('input, select, textarea').on('change', function() {
-                // Show unsaved changes indicator
-                const indicator = $('<span class="text-orange-500 text-xs ml-1">• غير محفوظ</span>');
-                $(this).parent().find('.unsaved-indicator').remove();
-                $(this).parent().append(indicator.addClass('unsaved-indicator'));
-            });
+    function toggleSetting(element) {
+        const isEnabled = element.classList.contains('bg-indigo-600');
+
+        if (isEnabled) {
+            // Disable
+            element.classList.remove('bg-indigo-600');
+            element.classList.add('bg-gray-200');
+            element.querySelector('span').classList.remove('translate-x-5');
+            element.querySelector('span').classList.add('translate-x-0');
+        } else {
+            // Enable
+            element.classList.remove('bg-gray-200');
+            element.classList.add('bg-indigo-600');
+            element.querySelector('span').classList.remove('translate-x-0');
+            element.querySelector('span').classList.add('translate-x-5');
+        }
+    }
+
+    // Auto-save indicators
+    $(document).ready(function() {
+        $('input, select, textarea').on('change', function() {
+            // Show unsaved changes indicator
+            const indicator = $('<span class="text-orange-500 text-xs ml-1">• غير محفوظ</span>');
+            $(this).parent().find('.unsaved-indicator').remove();
+            $(this).parent().append(indicator.addClass('unsaved-indicator'));
         });
-    </script>
+    });
+</script>
 @endsection
 <!-- Groups Settings -->
 {{-- <div class="bg-white shadow-lg rounded-lg overflow-hidden">

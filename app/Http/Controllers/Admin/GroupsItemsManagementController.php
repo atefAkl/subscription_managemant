@@ -16,9 +16,9 @@ class GroupsItemsManagementController extends Controller
     {
         //
         $validated = $request->validate([
-            'group_id' => 'required|exists:groups,id',
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string|max:255',
+            'group_id'      => 'required|exists:groups,id',
+            'name'          => 'required|string|max:255',
+            'description'   => 'nullable|string|max:255',
         ]);
         try {
             $groupItem = GroupItem::create($validated);
@@ -46,6 +46,23 @@ class GroupsItemsManagementController extends Controller
             return redirect()->back()->withSuccess('Group item updated successfully')->send();
         } catch (\Exception $e) {
             return redirect()->back()->withInput()->with('error', 'Failed to update group item: ' . $e->getMessage());
+        }
+    }
+
+    /* 
+    * 
+    */
+    public function destroy(GroupItem $groupItem)
+    {
+        //
+        if (!$groupItem) {
+            return redirect()->back()->withError('Group item not found');
+        }
+        try {
+            $groupItem->delete();
+            return redirect()->back()->withSuccess('Group item deleted successfully')->send();
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()->with('error', 'Failed to delete group item: ' . $e->getMessage());
         }
     }
 }

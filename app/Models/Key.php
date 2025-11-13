@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class Key extends Model
 {
     //
-    protected $table = 'keys';
+    protected $table = 'ss_keys';
     public $timestamps = true;
     protected $fillable = [
         'key_string',
@@ -20,14 +22,24 @@ class Key extends Model
         'user_id',
         'created_by',
         'updated_by',
+        'period',
     ];
     public function group_item()
     {
         return $this->belongsTo(GroupItem::class);
     }
-    public function user()
+
+    public static function generateKeyString()
+    {   // generate random string of 36 chars with only uppercase and lowercase English letters
+        do {
+            $key = Str::random(36);
+        } while (self::where('key_string', $key)->exists());
+        return $key;
+    }
+
+    public function client()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
     public static function statuses()
@@ -35,6 +47,14 @@ class Key extends Model
         return ['active', 'new', 'blocked', 'expired'];
     }
 
+    public function remainingDays()
+    {
+        $remDays = $this->period === 'week' ? 7 : ($this->period === 'month' ? 30 : 365);
+        if ($this->isActive()) {
+            $remDays = Carbon::diffInDays($this->activated_at, date('Y-m-d H:i:s'));
+        }
+        return $remDays;
+    }
     public function isActive()
     {
         return $this->status === 'active';

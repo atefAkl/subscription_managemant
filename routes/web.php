@@ -11,6 +11,7 @@ use App\Http\Controllers\Client\StatisticsController;
 use App\Http\Controllers\Admin\SubscriptionRequestController;
 use App\Http\Controllers\Admin\GroupsManagementController;
 use App\Http\Controllers\Admin\DeviceController as AdminDeviceController;
+use App\Http\Controllers\Admin\DeviceTypesController;
 use App\Http\Controllers\Admin\GroupsItemsManagementController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\keyManagementController;
@@ -114,15 +115,15 @@ Route::middleware('auth')->group(function () {
             Route::delete('/{client}/devices/{device}',             [ClientManagementController::class, 'deleteDevice'])->name('devices.destroy');
             Route::post('/{client}/devices/{device}/toggle',        [ClientManagementController::class, 'toggleDeviceStatus'])->name('devices.toggle');
             Route::get('/statistics/dashboard',                     [ClientManagementController::class, 'statistics'])->name('statistics');
-
-            // Keys Management
-            Route::prefix('keys')->name('keys.')->group(function () {
-                Route::get('/',                                         [KeyManagementController::class, 'index'])->name('index');
-                Route::post('/generate',                                [KeyManagementController::class, 'store'])->name('generate');
-                Route::put('/{key}',                                    [KeyManagementController::class, 'update'])->name('delete');
-                Route::get('/{key}',                                    [KeyManagementController::class, 'show'])->name('delete');
-                Route::delete('/{key}',                                 [KeyManagementController::class, 'destroy'])->name('delete');
-            });
+        });
+        // Keys Management
+        Route::prefix('keys')->name('keys.')->group(function () {
+            Route::get('/',                                         [KeyManagementController::class, 'index'])->name('index');
+            Route::post('/generate',                                [KeyManagementController::class, 'generate'])->name('generate');
+            Route::put('/{key}',                                    [KeyManagementController::class, 'update'])->name('update');
+            Route::put('/{key}/activate',                           [KeyManagementController::class, 'activate'])->name('activate');
+            Route::get('/{key}',                                    [KeyManagementController::class, 'show'])->name('show');
+            Route::get('/{key}/delete',                             [KeyManagementController::class, 'destroy'])->name('destroy');
         });
 
         // System Settings Module
@@ -139,12 +140,21 @@ Route::middleware('auth')->group(function () {
             Route::prefix('groups')->name('groups.')->group(function () {
                 Route::get('/',                                         [GroupsManagementController::class, 'index'])->name('index');
                 Route::post('/generate',                                [GroupsManagementController::class, 'store'])->name('store');
-                Route::put('/{group}',                                  [GroupsManagementController::class, 'update'])->name('update');
+                Route::put('/update',                                   [GroupsManagementController::class, 'update'])->name('update');
                 Route::get('/{group}',                                  [GroupsManagementController::class, 'show'])->name('show');
-                Route::delete('/{group}',                               [GroupsManagementController::class, 'destroy'])->name('destroy');
-                Route::post('/{group}/items',                           [GroupsItemsManagementController::class, 'store'])->name('items.store');
-                Route::put('/groups/items/{id}',                        [GroupsItemsManagementController::class, 'update'])->name('items.update');
-                Route::delete('/groups/items/{id}/delete',              [GroupsItemsManagementController::class, 'delete'])->name('items.delete');
+                Route::get('/{group}/delete',                           [GroupsManagementController::class, 'destroy'])->name('destroy');
+                Route::post('/items',                                   [GroupsItemsManagementController::class, 'store'])->name('items.store');
+                Route::put('/items/{id}',                               [GroupsItemsManagementController::class, 'update'])->name('items.update');
+                Route::get('/items/{groupItem}/delete',                 [GroupsItemsManagementController::class, 'destroy'])->name('items.delete');
+            });
+
+            // groups Management
+            Route::prefix('devices-types')->name('devices.types.')->group(function () {
+                Route::get('/',                                         [DeviceTypesController::class, 'index'])->name('index');
+                Route::post('/store',                                   [DeviceTypesController::class, 'store'])->name('store');
+                Route::put('/update',                                   [DeviceTypesController::class, 'update'])->name('update');
+                Route::get('/{deviceType}',                             [DeviceTypesController::class, 'show'])->name('show');
+                Route::delete('/delete',                                   [DeviceTypesController::class, 'destroy'])->name('destroy');
             });
         });
 
