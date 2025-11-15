@@ -28,6 +28,7 @@ return new class extends Migration
             $table->text('address')->nullable();
             $table->text('notes')->nullable();
             $table->timestamp('last_login_at')->nullable();
+            $table->string('last_login_ip')->nullable();
             $table->timestamps();
         });
 

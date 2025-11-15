@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('key_string', 36)->unique();
             $table->string('uuid', 10)->nullable();
-            $table->foreignId('device_type_id')->nullable()->constrained('device_types')->onDelete('setNull');
+            $table->foreignId('device_type_id')->nullable()->constrained('device_types')->onDelete('cascade');
             $table->foreignId('group_item_id')->constrained()->onDelete('cascade');
             $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
             $table->foreignId('updated_by')->constrained('users')->onDelete('cascade');
@@ -23,7 +23,7 @@ return new class extends Migration
             $table->datetime('blocked_at')->nullable();
             $table->enum('status', ['active', 'new', 'blocked', 'expired'])->default('new');
             $table->enum('period', ['week', 'month', 'year'])->default('year');
-            $table->foreignId('user_id')->nullable()->constrained()->onDelete('setNull');
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
             $table->timestamps();
             $table->engine('InnoDB');
         });

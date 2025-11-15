@@ -41,7 +41,13 @@ class AuthController extends Controller
         $remember = $request->has('remember');
 
         if (Auth::attempt($credentials, $remember)) {
-            $user = Auth::user();
+            // Get the authenticated user
+            $user = User::find(Auth::id());
+            // update the user login ip
+            $user->last_login_ip = $request->ip();
+            // update the user login time
+            $user->last_login_at = now();
+            $user->save();
 
             // Redirect based on user role
             if ($user->role === 'admin') {
