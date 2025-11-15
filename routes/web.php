@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\DeviceTypesController;
 use App\Http\Controllers\Admin\GroupsItemsManagementController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\keyManagementController;
+use App\Http\Controllers\PackageFeaturesController;
 use App\Http\Controllers\ServicePackageController;
 use Illuminate\Support\Facades\Route;
 
@@ -120,9 +121,9 @@ Route::middleware('auth')->group(function () {
         Route::prefix('keys')->name('keys.')->group(function () {
             Route::get('/',                                         [KeyManagementController::class, 'index'])->name('index');
             Route::post('/generate',                                [KeyManagementController::class, 'generate'])->name('generate');
-            Route::put('/{key}',                                    [KeyManagementController::class, 'update'])->name('update');
-            Route::put('/{key}/activate',                           [KeyManagementController::class, 'activate'])->name('activate');
-            Route::get('/{key}',                                    [KeyManagementController::class, 'show'])->name('show');
+            Route::put('/{key}/show',                               [KeyManagementController::class, 'update'])->name('update');
+            Route::put('/activate',                                 [KeyManagementController::class, 'activate'])->name('activate');
+            Route::get('/show/{key}',                               [KeyManagementController::class, 'show'])->name('show');
             Route::get('/{key}/delete',                             [KeyManagementController::class, 'destroy'])->name('destroy');
         });
 
@@ -156,6 +157,14 @@ Route::middleware('auth')->group(function () {
                 Route::get('/{deviceType}',                             [DeviceTypesController::class, 'show'])->name('show');
                 Route::delete('/delete',                                   [DeviceTypesController::class, 'destroy'])->name('destroy');
             });
+
+            // Packages Features Management
+            Route::prefix('packages-features')->name('packages.features.')->group(function () {
+                Route::get('/',                                         [PackageFeaturesController::class, 'index'])->name('index');
+                Route::post('/store',                                   [PackageFeaturesController::class, 'store'])->name('store');
+                Route::put('/update',                                   [PackageFeaturesController::class, 'update'])->name('update');
+                Route::delete('/delete',                                 [PackageFeaturesController::class, 'destroy'])->name('destroy');
+            });
         });
 
         // Statistics Module
@@ -188,7 +197,7 @@ Route::middleware('auth')->group(function () {
                 Route::put('/{package}',       [ServicePackageController::class, 'update'])->name('update');
                 Route::delete('/{package}',    [ServicePackageController::class, 'destroy'])->name('destroy');
             });
-            Route::post('/{package}/customize/features',    [ServicePackageController::class, 'customizeFeatures'])->name('customizeFeatures');
+            Route::put('/customize/features/values',    [PackageFeaturesController::class, 'customizeFeatures'])->name('customize.features.values');
 
             // Packages Management
             Route::get('',                 [ServicePackageController::class, 'index'])->name('index');
@@ -248,6 +257,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/subscriptions/{id}', [SubscriptionController::class, 'show'])->name('subscriptions.show');
         Route::get('/subscriptions/{id}/devices', [SubscriptionController::class, 'manageDevices'])->name('subscriptions.devices');
         Route::post('/subscriptions/{id}/devices', [SubscriptionController::class, 'addDevice'])->name('subscriptions.devices.add');
+
+        // Start subscription from selected package on home page
+        Route::get('/subscriptions/start-from-package/{package}', [SubscriptionController::class, 'startFromPackage'])->name('subscriptions.start-from-package');
+        Route::post('/subscriptions/start-from-package/{package}', [SubscriptionController::class, 'storeFromPackage'])->name('subscriptions.store-from-package');
 
         // Subscription Requests
         Route::get('/subscription-requests/{id}', [SubscriptionController::class, 'showRequest'])->name('subscription-requests.show');

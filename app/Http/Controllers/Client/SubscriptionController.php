@@ -80,6 +80,56 @@ class SubscriptionController extends Controller
     }
 
     /**
+     * عرض نموذج طلب اشتراك من باقة محددة من الصفحة الرئيسية
+     */
+    public function startFromPackage($packageId)
+    {
+        $package = \App\Models\ServicePackage::findOrFail($packageId);
+
+        return view('client.subscriptions.start-from-package', compact('package'));
+    }
+
+    /**
+     * حفظ طلب اشتراك جديد من باقة محددة (من الصفحة الرئيسية)
+     */
+    public function storeFromPackage(Request $request, $packageId)
+    {
+        $package = \App\Models\ServicePackage::findOrFail($packageId);
+
+        $validated = $request->validate([
+            'certificate_number' => 'required|string|max:255',
+            'certificate_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'payment_receipt' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'notes' => 'nullable|string|max:1000',
+        ]);
+
+        // رفع الملفات
+        $certificatePath = null;
+        if ($request->hasFile('certificate_file')) {
+            $certificatePath = $request->file('certificate_file')->store('certificates', 'public');
+        }
+
+        $paymentReceiptPath = $request->file('payment_receipt')->store('payment-receipts', 'public');
+
+        $data = [
+            'user_id' => Auth::id(),
+            'serial_number' => SubscriptionRequest::generateSerialNumber(),
+            'subscription_name' => $package->name,
+            'device_count' => $package->device_limit ?? 1,
+            'proposed_start_date' => now(),
+            'notes' => ($validated['notes'] ?? '') . '\nCertificate Number: ' . $validated['certificate_number'],
+            'status' => 'pending',
+            'payment_receipt' => $paymentReceiptPath,
+        ];
+
+        $subscriptionRequest = SubscriptionRequest::create($data);
+
+        return redirect()
+            ->route('client.subscription-requests.show', $subscriptionRequest->id)
+            ->with('success', 'تم إرسال طلب الاشتراك بنجاح! سيتم مراجعة البيانات وإتمام الإجراءات من قبل الإدارة.');
+    }
+
+    /**
      * عرض تفاصيل طلب اشتراك
      */
     public function showRequest($id)

@@ -18,10 +18,13 @@ return new class extends Migration
       $table->timestamp('expires_at')->nullable();
       $table->timestamp('suspended_at')->nullable();
       $table->timestamp('renewed_at')->nullable();
+      $table->boolean('is_demo')->define(0);
       $table->text('suspension_reason')->nullable();
       $table->foreignId('user_id')->constrained()->onDelete('cascade');
       $table->string('subscription_name');
       $table->integer('device_count');
+      $table->string('serial_number', 16)->unique();
+      $table->foreignId('service_package_id')->constrained('service_packages')->onDelete('cascade');
       $table->date('proposed_start_date');
       $table->text('notes')->nullable();
       $table->enum('status', ['pending', 'quoted', 'paid', 'active', 'approved', 'rejected'])->default('pending');

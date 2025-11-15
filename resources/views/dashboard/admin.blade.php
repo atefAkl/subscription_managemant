@@ -174,6 +174,24 @@
                     </div>
                 </a>
 
+                <!-- Card 4: Subscription Requests Management -->
+                <a href="{{ route('admin.subscription-requests.index', ['status' => 'pending']) }}"
+                    class="bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 card-compact">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-clipboard-list text-yellow-600 text-xl"></i>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-2xl font-bold text-yellow-600">{{ $subscriptionStats['pending_requests'] ?? 0 }}</div>
+                                <div class="text-xs text-gray-500">طلبات معلقة</div>
+                            </div>
+                        </div>
+                        <h3 class="font-bold text-gray-900 mb-1">طلبات الاشتراك</h3>
+                        <p class="text-gray-600 text-xs">مراجعة وقبول طلبات العملاء</p>
+                    </div>
+                </a>
+
                 <!-- Card 4: Devices Management -->
                 <a href="{{ route('admin.devices.index') }}"
                     class="bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 card-compact">

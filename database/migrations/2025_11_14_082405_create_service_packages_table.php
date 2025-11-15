@@ -12,14 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('service_packages', function (Blueprint $table) {
-            $table->engine('innodb');
             $table->id();
-            $table->string('name', 45)->nullable(false)->unique();
-            $table->text('description', 255);
-            $table->decimal('price', 10, 2);
-            $table->integer('duration')->default(1);
-            $table->enum('duration_unit', ['months', 'years', 'days', 'weeks'])->default('days');
-
             $table->timestamps();
         });
     }

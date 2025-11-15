@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('key_string', 36)->unique();
             $table->string('uuid', 10)->nullable();
-            $table->string('device_type', 10)->nullable();
+            $table->foreignId('device_type_id')->nullable()->constrained('device_types')->onDelete('setNull');
             $table->foreignId('group_item_id')->constrained()->onDelete('cascade');
             $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
             $table->foreignId('updated_by')->constrained('users')->onDelete('cascade');

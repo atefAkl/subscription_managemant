@@ -78,8 +78,9 @@
 
                         <div class="mb-3">
                             <label class="form-label text-muted">الايصال</label><br>
-                            @if($subscription->payment_receipt)
-                            <button class="btn btn-primary btn-sm" onclick="window.open('{{asset('storage/' . $subscription->payment_receipt)}}', '_blank')">عرض الصورة</button>
+                            @php $requestReceipt = optional($subscription->subscriptionRequest)->payment_receipt; @endphp
+                            @if($requestReceipt)
+                            <button class="btn btn-primary btn-sm" onclick="window.open('{{asset('storage/' . $requestReceipt)}}', '_blank')">عرض الصورة</button>
                             @else
                             <p>لم يتم ارسال شيك الدفع</p>
                             @endif
@@ -88,7 +89,8 @@
 
                     <div class="grid grid-cols-1">
                         <label class="form-label text-muted">ملاحظات العميل</label>
-                        <p>{{ $subscription->notes ?? 'لا يوجد ملاحظات مسجلة'}} </p>
+                        @php $requestNotes = optional($subscription->subscriptionRequest)->notes; @endphp
+                        <p>{{ $requestNotes ?? 'لا يوجد ملاحظات مسجلة'}} </p>
                     </div>
                 </div>
             </div>

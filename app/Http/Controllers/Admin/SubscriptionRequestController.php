@@ -57,6 +57,7 @@ class SubscriptionRequestController extends Controller
     public function showQuoteForm($id)
     {
         $subscriptionRequest = SubscriptionRequest::where('status', 'pending')
+            ->where('is_demo', true)
             ->findOrFail($id);
 
         return view('admin.subscription-requests.quote', compact('subscriptionRequest'));
@@ -68,6 +69,7 @@ class SubscriptionRequestController extends Controller
     public function sendQuote(Request $request, $id)
     {
         $subscriptionRequest = SubscriptionRequest::where('status', 'pending')
+            ->where('is_demo', true)
             ->findOrFail($id);
 
         $validated = $request->validate([

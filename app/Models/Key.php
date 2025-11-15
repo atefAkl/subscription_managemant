@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use PhpParser\Node\Expr\Cast\Double;
 
 class Key extends Model
 {
@@ -16,12 +17,13 @@ class Key extends Model
         'key_string',
         'uuid',
         'device_id',
-        'device_type',
+        'device_type_id',
         'group_item_id',
         'status',
         'user_id',
         'created_by',
         'updated_by',
+        'activated_at',
         'period',
     ];
     public function group_item()
@@ -49,15 +51,22 @@ class Key extends Model
 
     public function remainingDays()
     {
-        $remDays = $this->period === 'week' ? 7 : ($this->period === 'month' ? 30 : 365);
+        $period = $this->period === 'week' ? 7 : ($this->period === 'month' ? 30 : 365);
+        $remDays = $period;
         if ($this->isActive()) {
-            $remDays = Carbon::diffInDays($this->activated_at, date('Y-m-d H:i:s'));
+            $remDays = Carbon::parse($this->activated_at)->diffInDays(now());
+            $remDays = $period - $remDays;
         }
-        return $remDays;
+        return round((float) $remDays, 2);
     }
     public function isActive()
     {
         return $this->status === 'active';
+    }
+
+    public function groupItem()
+    {
+        return $this->belongsTo(GroupItem::class);
     }
 
     public function isBlocked()

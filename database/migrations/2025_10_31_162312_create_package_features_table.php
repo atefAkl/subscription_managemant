@@ -15,6 +15,10 @@ return new class extends Migration
             $table->engine('innodb');
             $table->id();
             $table->string('name', 45)->nullable(false)->unique();
+            $table->string('description')->nullable(true);
+            $table->integer('display_order')->nullable(true);
+            $table->foreignId('created_by')->constrained()->onDelete('cascade');
+            $table->foreignId('updated_by')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }

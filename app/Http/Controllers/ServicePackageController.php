@@ -14,8 +14,9 @@ class ServicePackageController extends Controller
     public function index()
     {
         //
-        $packages = ServicePackage::all();
-        return view('admin.packages.index', compact('packages'));
+        $packages = ServicePackage::with('values')->get();
+        $features = PackageFeature::all();
+        return view('admin.packages.index', compact('packages', 'features'));
     }
 
     /**
@@ -29,6 +30,7 @@ class ServicePackageController extends Controller
     public function store(Request $request)
     {
         //
+        // return $request->all();
         $validated = $request->validate([
             'name'          => ['required', 'string', 'unique:service_packages,name', 'max:60'],
             'description'   => ['required', 'string', 'max:255'],

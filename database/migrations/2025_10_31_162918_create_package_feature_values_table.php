@@ -14,9 +14,10 @@ return new class extends Migration
         Schema::create('package_feature_values', function (Blueprint $table) {
             $table->engine('innodb');
             $table->id();
-            $table->foreignId('package_id')->constrained('service_packages')->cascadeOnDelete();
+            $table->foreignId('service_package_id')->constrained('service_packages')->cascadeOnDelete();
             $table->foreignId('package_feature_id')->constrained('package_features')->cascadeOnDelete();
             $table->string('value', 45)->nullable(false);
+            $table->string('value_type')->nullable(true)->default('text');
             $table->timestamps();
         });
     }

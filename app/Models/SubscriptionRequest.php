@@ -18,6 +18,7 @@ class SubscriptionRequest extends Model
         'proposed_start_date',
         'notes',
         'status',
+        'is_demo',
         'quoted_price',
         'payment_method',
         'admin_notes',
@@ -47,11 +48,11 @@ class SubscriptionRequest extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function generateSerialNumber()
+    public static function generateSerialNumber()
     {
         //generate unique serial number
         $serialNumber = Str::random(16);
-        while (SubscriptionRequest::where('serial_number', $serialNumber)->exists()) {
+        while (self::where('serial_number', $serialNumber)->exists()) {
             $serialNumber = Str::random(16);
         }
         return $serialNumber;
@@ -90,8 +91,12 @@ class SubscriptionRequest extends Model
     // طرق مساعدة
     public function getStatusLabelAttribute(): string
     {
+        // تمييز حالة pending بين طلبات الديمو وغير الديمو
+        if ($this->status === 'pending') {
+            return $this->is_demo ? 'في انتظار عرض السعر' : 'قيد المراجعة';
+        }
+
         $labels = [
-            'pending' => 'في انتظار عرض السعر',
             'quoted' => 'تم إرسال عرض السعر',
             'paid' => 'تم السداد',
             'active' => 'نشط',

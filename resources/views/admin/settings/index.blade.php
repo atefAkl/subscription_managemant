@@ -21,6 +21,14 @@
         <a class="p-6" href="{{route('admin.settings.devices.types.index')}}">{{ __('ادارة الأجهزة') }}</a>
     </div>
 
+    <div class="shadow-sm rounded-lg overflow-hidden btn btn-primary py-12">
+        <a class="p-6" href="{{route('admin.settings.packages.features.index')}}">{{ __('ادارة الميزات') }}</a>
+    </div>
+
+    <div class="shadow-sm rounded-lg overflow-hidden btn btn-primary py-12">
+        <a class="p-6" href="{{route('admin.packages.index')}}">{{ __('ادارة الباقات') }}</a>
+    </div>
+
 
 </div>
 

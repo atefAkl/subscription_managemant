@@ -9,8 +9,8 @@ class PackageFeatureValue extends Model
     //
     protected $table = 'package_feature_values';
     protected $fillable = [
-        'package_id',
-        'feature_id',
+        'service_package_id',
+        'package_feature_id',
         'value',
         'value_type'
     ];
@@ -24,6 +24,6 @@ class PackageFeatureValue extends Model
 
     public function feature()
     {
-        return $this->belongsTo(PackageFeature::class);
+        return $this->belongsTo(PackageFeature::class, 'package_feature_id', 'id');
     }
 }
