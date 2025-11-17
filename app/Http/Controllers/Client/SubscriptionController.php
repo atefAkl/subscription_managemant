@@ -7,10 +7,12 @@ use App\Models\SubscriptionRequest;
 use App\Models\Subscription;
 use App\Models\Device;
 use App\Models\Payment;
+use App\Models\SubscriptionComment;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class SubscriptionController extends Controller
 {
@@ -51,6 +53,7 @@ class SubscriptionController extends Controller
      */
     public function store(Request $request)
     {
+
         $validated = $request->validate([
             'subscription_name' => 'required|string|max:255',
             'device_count' => 'required|integer|min:1|max:10',
@@ -96,37 +99,111 @@ class SubscriptionController extends Controller
     {
         $package = \App\Models\ServicePackage::findOrFail($packageId);
 
+        // التحقق من صحة البيانات
         $validated = $request->validate([
-            'certificate_number' => 'required|string|max:255',
-            'certificate_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
-            'payment_receipt' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'payment_method' => 'required|in:vodafone_cash,etisalat_cash,orange_cash,fawry,bank_transfer,visa_card',
+            'payment_receipt' => 'required_if:payment_method,vodafone_cash,etisalat_cash,orange_cash,fawry|file|mimes:jpg,jpeg,png,pdf|max:5120',
+            'certificate_number' => 'nullable|string|max:255',
+            'certificate_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
             'notes' => 'nullable|string|max:1000',
+        ], [
+            'payment_method.required' => 'يرجى اختيار وسيلة دفع',
+            'payment_method.in' => 'وسيلة الدفع المختارة غير صحيحة',
+            'payment_receipt.required_if' => 'يرجى رفع صورة إيصال التحويل',
+            'payment_receipt.file' => 'يجب أن يكون الإيصال ملف صحيح',
+            'payment_receipt.mimes' => 'نوع الملف يجب أن يكون: jpg, jpeg, png, pdf',
+            'payment_receipt.max' => 'حجم الملف يجب ألا يزيد عن 5 ميجابايت'
         ]);
 
-        // رفع الملفات
-        $certificatePath = null;
-        if ($request->hasFile('certificate_file')) {
-            $certificatePath = $request->file('certificate_file')->store('certificates', 'public');
+        // التحقق من أن وسيلة الدفع متاحة
+        $maintenanceMethods = ['bank_transfer', 'visa_card'];
+        if (in_array($validated['payment_method'], $maintenanceMethods)) {
+            return back()->withErrors(['payment_method' => 'هذه الوسيلة غير متاحة حالياً، يرجى اختيار وسيلة أخرى'])->withInput();
         }
 
-        $paymentReceiptPath = $request->file('payment_receipt')->store('payment-receipts', 'public');
+        $subscriptionRequest = null;
 
-        $data = [
-            'user_id' => Auth::id(),
-            'serial_number' => SubscriptionRequest::generateSerialNumber(),
-            'subscription_name' => $package->name,
-            'device_count' => $package->device_limit ?? 1,
-            'proposed_start_date' => now(),
-            'notes' => ($validated['notes'] ?? '') . '\nCertificate Number: ' . $validated['certificate_number'],
-            'status' => 'pending',
-            'payment_receipt' => $paymentReceiptPath,
-        ];
+        DB::transaction(function () use ($validated, $package, $request, &$subscriptionRequest) {
+            // 1. Create Subscription Request
+            $subscriptionRequestData = [
+                'user_id' => Auth::id(),
+                'serial_number' => SubscriptionRequest::generateSerialNumber(),
+                'subscription_name' => $package->name,
+                'device_count' => $package->device_limit ?? 1,
+                'proposed_start_date' => now(),
+                'notes' => $validated['notes'],
+                'status' => 'pending',
+                'quoted_price' => $package->price,
+                'payment_method' => $validated['payment_method'],
+                'payment_verification_status' => 'pending'
+            ];
 
-        $subscriptionRequest = SubscriptionRequest::create($data);
+            // رفع إيصال الدفع إذا كان موجوداً
+            if ($request->hasFile('payment_receipt')) {
+                $subscriptionRequestData['payment_receipt'] = $request->file('payment_receipt')->store('payment-receipts', 'public');
+            }
+
+            $subscriptionRequest = SubscriptionRequest::create($subscriptionRequestData);
+
+            // 2. رفع ملف الشهادة إذا كان موجوداً
+            if ($request->hasFile('certificate_file')) {
+                $certificatePath = $request->file('certificate_file')->store('certificates', 'public');
+                // يمكن حفظ مسار الملف في الملاحظات أو إنشاء جدول منفصل للملفات
+                $subscriptionRequest->update([
+                    'notes' => ($subscriptionRequest->notes ?? '') . "\nملف الشهادة: " . $certificatePath
+                ]);
+            }
+
+            // 3. إضافة رقم الشهادة إلى الملاحظات إذا كان موجوداً
+            if (!empty($validated['certificate_number'])) {
+                $subscriptionRequest->update([
+                    'notes' => ($subscriptionRequest->notes ?? '') . "\nرقم الشهادة: " . $validated['certificate_number']
+                ]);
+            }
+
+            // 4. إنشاء تعليق ترحيبي للعميل
+            SubscriptionComment::create([
+                'subscription_request_id' => $subscriptionRequest->id,
+                'user_id' => Auth::id(),
+                'message' => 'تم إرسال طلب الاشتراك بنجاح! سيتم مراجعة البيانات والتحقق من الدفع من قبل الإدارة.',
+                'comment_type' => 'message',
+                'is_admin' => false
+            ]);
+
+            // 5. إنشاء تعليق إشعار للإدارة
+            SubscriptionComment::create([
+                'subscription_request_id' => $subscriptionRequest->id,
+                'user_id' => Auth::id(),
+                'message' => "طلب اشتراك جديد من العميل {$subscriptionRequest->user->name} للباقة {$package->name} بوسيلة دفع {$this->getPaymentMethodName($validated['payment_method'])}",
+                'comment_type' => 'status_change',
+                'is_admin' => false
+            ]);
+        });
+
+        if (!$subscriptionRequest) {
+            return back()->withErrors(['error' => 'حدث خطأ أثناء إنشاء طلب الاشتراك'])->withInput();
+        }
 
         return redirect()
             ->route('client.subscription-requests.show', $subscriptionRequest->id)
-            ->with('success', 'تم إرسال طلب الاشتراك بنجاح! سيتم مراجعة البيانات وإتمام الإجراءات من قبل الإدارة.');
+            ->with('success', 'تم إرسال طلب الاشتراك بنجاح! سيتم مراجعة البيانات والتحقق من الدفع من قبل الإدارة.');
+    }
+
+    /**
+     * الحصول على اسم وسيلة الدفع بالعربية
+     */
+    private function getPaymentMethodName($method)
+    {
+        $methods = [
+            'vodafone_cash' => 'فودافون كاش',
+            'etisalat_cash' => 'اتصالات كاش',
+            'orange_cash' => 'أورانج كاش',
+            'fawry' => 'فوري',
+            'bank_transfer' => 'تحويل بنكي',
+            'visa_card' => 'فيزا كارد'
+        ];
+
+        return $methods[$method] ?? $method;
     }
 
     /**
@@ -135,7 +212,7 @@ class SubscriptionController extends Controller
     public function showRequest($id)
     {
         $subscriptionRequest = SubscriptionRequest::where('user_id', Auth::id())
-            ->with('requestDevices')
+            ->with(['requestDevices', 'comments.user', 'paymentVerifiedBy'])
             ->findOrFail($id);
 
         return view('client.subscriptions.show-request', compact('subscriptionRequest'));

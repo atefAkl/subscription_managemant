@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('password');
             $table->boolean('is_app_admin')->nullable()->default(false);
             $table->enum('role', ['admin', 'client'])->default('client');
+            $table->integer('access_level')->default(3);
             $table->enum('status', ['active', 'pending', 'blocked'])->default('pending');
             $table->rememberToken();
             $table->string('phone')->nullable();

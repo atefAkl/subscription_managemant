@@ -15,9 +15,12 @@ class Subscription extends Model
         'name',
         'device_count',
         'price',
+        'paid_amount',
+        'remaining_amount',
         'start_date',
         'end_date',
         'status',
+        'payment_confirmed_at',
         'description',
         'features'
     ];
@@ -25,8 +28,11 @@ class Subscription extends Model
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
+        'payment_confirmed_at' => 'datetime',
         'features' => 'array',
-        'price' => 'decimal:2'
+        'price' => 'decimal:2',
+        'paid_amount' => 'decimal:2',
+        'remaining_amount' => 'decimal:2'
     ];
 
     // العلاقات
@@ -43,6 +49,16 @@ class Subscription extends Model
     public function devices(): HasMany
     {
         return $this->hasMany(Device::class);
+    }
+
+    public function certificates(): HasMany
+    {
+        return $this->hasMany(SubscriptionCertificate::class);
+    }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(SubscriptionComment::class);
     }
 
     // طرق مساعدة

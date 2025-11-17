@@ -5,8 +5,13 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\SubscriptionRequest;
 use App\Models\Payment;
+use App\Models\Subscription;
+use App\Models\SubscriptionComment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class SubscriptionRequestController extends Controller
 {
@@ -45,7 +50,7 @@ class SubscriptionRequestController extends Controller
      */
     public function show($id)
     {
-        $subscriptionRequest = SubscriptionRequest::with(['user', 'payments', 'subscription.devices'])
+        $subscriptionRequest = SubscriptionRequest::with(['user', 'payments', 'subscription.devices', 'comments.user', 'paymentVerifiedBy'])
             ->findOrFail($id);
 
         return view('admin.subscription-requests.show', compact('subscriptionRequest'));
@@ -222,5 +227,142 @@ class SubscriptionRequestController extends Controller
                 ] : null
             ]
         ]);
+    }
+
+    /**
+     * التحقق من دفع طلب الاشتراك
+     */
+    public function verifySubscriptionPayment(Request $request, $subscriptionRequestId)
+    {
+        try {
+            Log::info('Payment verification request', [
+                'subscription_request_id' => $subscriptionRequestId,
+                'action' => $request->action,
+                'request_data' => $request->all()
+            ]);
+
+            $subscriptionRequest = SubscriptionRequest::with(['user', 'comments', 'payments'])
+                ->where('payment_verification_status', 'pending')
+                ->findOrFail($subscriptionRequestId);
+
+            $request->validate([
+                'action' => 'required|in:verify,reject',
+                'notes' => 'nullable|string|max:1000'
+            ]);
+
+            DB::transaction(function () use ($request, $subscriptionRequest) {
+                if ($request->action === 'verify') {
+                    // تحديث حالة طلب الاشتراك
+                    $subscriptionRequest->update([
+                        'payment_verification_status' => 'verified',
+                        'payment_verified_by' => Auth::id(),
+                        'payment_verified_at' => now(),
+                        'payment_verification_notes' => $request->notes,
+                        'status' => 'active' // تغيير الحالة إلى نشط
+                    ]);
+
+                    // إنشاء اشتراك فعلي
+                    $subscription = Subscription::create([
+                        'user_id' => $subscriptionRequest->user_id,
+                        'subscription_request_id' => $subscriptionRequest->id,
+                        'name' => $subscriptionRequest->subscription_name,
+                        'device_count' => $subscriptionRequest->device_count,
+                        'price' => $subscriptionRequest->quoted_price,
+                        'paid_amount' => $subscriptionRequest->quoted_price,
+                        'remaining_amount' => 0, // مكتمل الدفع
+                        'start_date' => now(),
+                        'end_date' => now()->addYear(), // افتراضي سنة واحدة
+                        'status' => 'pending',
+                        'payment_confirmed_at' => now(),
+                        'description' => 'اشتراك تم إنشاؤه من طلب رقم ' . $subscriptionRequest->id
+                    ]);
+
+                    // تحديث بيانات المدفوعات لتشير إلى الاشتراك الجديد
+                    $subscriptionRequest->payments()->update([
+                        'subscription_id' => $subscription->id,
+                        'status' => 'verified',
+                        'verified_by' => Auth::id(),
+                        'verified_at' => now()
+                    ]);
+
+                    // تحديث التعليقات لتشير إلى الاشتراك الجديد
+                    $subscriptionRequest->comments()->update([
+                        'subscription_id' => $subscription->id
+                    ]);
+
+                    // إضافة تعليق بقبول الدفع
+                    SubscriptionComment::create([
+                        'subscription_request_id' => $subscriptionRequest->id,
+                        'subscription_id' => $subscription->id,
+                        'user_id' => Auth::id(),
+                        'message' => 'تم قبول الدفع وإنشاء الاشتراك بنجاح. يمكنك الآن إرسال شهادات Apple Developer للبدء في استخدام الخدمة.',
+                        'comment_type' => 'payment_verification',
+                        'is_admin' => true
+                    ]);
+                } else {
+                    // رفض الدفع
+                    $subscriptionRequest->update([
+                        'payment_verification_status' => 'rejected',
+                        'payment_verified_by' => Auth::id(),
+                        'payment_verified_at' => now(),
+                        'payment_verification_notes' => $request->notes
+                    ]);
+
+                    // إضافة تعليق برفض الدفع
+                    SubscriptionComment::create([
+                        'subscription_request_id' => $subscriptionRequest->id,
+                        'user_id' => Auth::id(),
+                        'message' => $request->notes ?: 'تم رفض الدفع، يرجى التحقق من إيصال التحويل وإعادة المحاولة.',
+                        'comment_type' => 'payment_verification',
+                        'is_admin' => true
+                    ]);
+                }
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => $request->action === 'verify' ? 'تم قبول الدفع وإنشاء الاشتراك بنجاح' : 'تم رفض الدفع'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Payment verification error', [
+                'subscription_request_id' => $subscriptionRequestId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'حدث خطأ أثناء معالجة الطلب: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * عرض طلبات الاشتراك المعلقة للتحقق من الدفع
+     */
+    public function pendingPaymentVerification()
+    {
+        $subscriptionRequests = SubscriptionRequest::with(['user', 'paymentVerifiedBy'])
+            ->where('payment_verification_status', 'pending')
+            ->whereNotNull('payment_method')
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+
+        return view('admin.subscription-requests.pending-payments', compact('subscriptionRequests'));
+    }
+
+    /**
+     * عرض تفاصيل طلب الاشتراك مع التعليقات
+     */
+    public function showWithComments($id)
+    {
+        $subscriptionRequest = SubscriptionRequest::with([
+            'user',
+            'comments.user',
+            'subscription.certificates',
+            'paymentVerifiedBy'
+        ])->findOrFail($id);
+
+        return view('admin.subscription-requests.show-with-comments', compact('subscriptionRequest'));
     }
 }

@@ -25,7 +25,7 @@
 
     </head>
 
-    <body>
+    <body class="bg-gray-100">
         <!-- Navigation -->
         <nav class="bg-white shadow-sm fixed-top z-50">
             <div class="max-w-7xl mx-auto px-4">

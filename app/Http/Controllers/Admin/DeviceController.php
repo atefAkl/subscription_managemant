@@ -39,7 +39,7 @@ class DeviceController extends Controller
 
         $devices = $query->paginate(15);
 
-        return view('admin.devices.index', compact('devices', 'status'));
+        return view('admin.settings.devices-types.index', compact('devices', 'status'));
     }
 
     /**

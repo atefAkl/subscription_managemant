@@ -29,7 +29,11 @@ class SubscriptionRequest extends Model
         'expires_at',
         'suspended_at',
         'renewed_at',
-        'suspension_reason'
+        'suspension_reason',
+        'payment_verification_status',
+        'payment_verified_by',
+        'payment_verified_at',
+        'payment_verification_notes'
     ];
 
     protected $casts = [
@@ -39,7 +43,8 @@ class SubscriptionRequest extends Model
         'activated_at' => 'datetime',
         'expires_at' => 'datetime',
         'suspended_at' => 'datetime',
-        'renewed_at' => 'datetime'
+        'renewed_at' => 'datetime',
+        'payment_verified_at' => 'datetime'
     ];
 
     // العلاقات
@@ -88,17 +93,44 @@ class SubscriptionRequest extends Model
         return $this->hasOne(Payment::class);
     }
 
+    public function comments(): HasMany
+    {
+        return $this->hasMany(SubscriptionComment::class);
+    }
+
+    public function paymentVerifiedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'payment_verified_by');
+    }
+
+    /**
+     * الحصول على اسم وسيلة الدفع بالعربية
+     */
+    public function getPaymentMethodName(): string
+    {
+        $methods = [
+            'vodafone_cash' => 'فودافون كاش',
+            'etisalat_cash' => 'اتصالات كاش',
+            'orange_cash' => 'أورانج كاش',
+            'fawry' => 'فوري',
+            'bank_transfer' => 'تحويل بنكي',
+            'visa_card' => 'فيزا كارد'
+        ];
+
+        return $methods[$this->payment_method] ?? $this->payment_method ?? 'غير محدد';
+    }
+
     // طرق مساعدة
     public function getStatusLabelAttribute(): string
     {
         // تمييز حالة pending بين طلبات الديمو وغير الديمو
         if ($this->status === 'pending') {
-            return $this->is_demo ? 'في انتظار عرض السعر' : 'قيد المراجعة';
+            return $this->is_demo ? 'في انتظار التحقق من الدفع' : 'قيد المراجعة';
         }
 
         $labels = [
             'quoted' => 'تم إرسال عرض السعر',
-            'paid' => 'تم السداد',
+            'paid' => 'تم قبول الدفع',
             'active' => 'نشط',
             'approved' => 'تمت الموافقة',
             'rejected' => 'مرفوض'

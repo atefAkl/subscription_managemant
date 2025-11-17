@@ -3,28 +3,38 @@
 <!-- Main Content -->
 
 @section('content')
-
-<x-breadcrumb :items="[
+<!-- Breadcrumb -->
+<div class="max-w-7xl mx-auto py-2 sm:px-6 lg:px-8">
+    <div class="bg-white rounded shadow-sm px-4 py-2 mb-0 md:flex md:items-center md:justify-between">
+        <x-breadcrumb :items="[
         ['title' => 'لوحة التحكم', 'url' => route('admin.dashboard')],
         ['title' => 'إدارة المستخدمين', 'url' => route('admin.users.index')],
         ['title' => 'إضافة مستخدم جديد']
     ]" />
+    </div>
+</div>
 
-<div class="max-w-6xl mx-auto py-3 sm:px-6 lg:px-8">
-
-    <!-- Header -->
-    <div class="mb-3">
-        <h2 class="text-lg font-bold  text-gray-900">
-            ➕ إضافة مستخدم جديد
-        </h2>
-        <p class="mt-2 text-sm text-gray-500">
-            إضافة مستخدم جديد للنظام (مدير أو عميل)
-        </p>
+<!-- Main Content -->
+<div class="max-w-7xl mx-auto py-2 sm:px-6 lg:px-8">
+    <div class="bg-white rounded shadow-sm px-4 py-2 mb-3 md:flex md:items-center md:justify-between">
+        <div>
+            <h3 class="text-lg leading-6 font-medium text-gray-900">
+                إضافة مسؤول جديد
+            </h3>
+            <p class="mt-1 max-w-2xl text-sm text-gray-500">
+                إضافة مسؤول جديد للنظام
+            </p>
+        </div>
+        <a href="{{ route('admin.users.index') }}"
+            class="btn-icon inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+            <i class="fas fa-plus"></i>
+            قائمة المسؤولين
+        </a>
     </div>
 
     <!-- Form -->
     <div class="bg-white shadow-sm overflow-hidden sm:rounded-lg">
-        <div class="px-6 py-3 border-b border-gray-200">
+        <div class="px-6 py-2 border-b border-gray-200">
             <h3 class="text-lg leading-6 font-medium text-gray-900">
                 معلومات المستخدم
             </h3>
@@ -43,13 +53,13 @@
                         الاسم الكامل *
                     </label>
                     <div class="mt-1 relative">
-                        <input type="text" name="name" id="name"
-                            value="{{ old('name') }}"
+                        <input type="text" name="name" id="name" value="{{ old('name') }}"
                             class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('name') border-red-300 @enderror">
                         @error('name')
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                    clip-rule="evenodd"></path>
                             </svg>
                         </div>
                         @enderror
@@ -63,13 +73,13 @@
                         اسم المستخدم *
                     </label>
                     <div class="mt-1 relative">
-                        <input type="text" name="user_name" id="user_name"
-                            value="{{ old('user_name') }}"
+                        <input type="text" name="user_name" id="user_name" value="{{ old('user_name') }}"
                             class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('user_name') border-red-300 @enderror">
                         @error('user_name')
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                    clip-rule="evenodd"></path>
                             </svg>
                         </div>
                         @enderror
@@ -86,13 +96,13 @@
                         البريد الإلكتروني *
                     </label>
                     <div class="mt-1 relative">
-                        <input type="email" name="email" id="email"
-                            value="{{ old('email') }}"
+                        <input type="email" name="email" id="email" value="{{ old('email') }}"
                             class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('email') border-red-300 @enderror">
                         @error('email')
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                    clip-rule="evenodd"></path>
                             </svg>
                         </div>
                         @enderror
@@ -149,9 +159,7 @@
                         رقم الهاتف
                     </label>
                     <div class="mt-1">
-                        <input type="tel" name="phone" id="phone"
-                            value="{{ old('phone') }}"
-                            placeholder="مثال: 01234567890"
+                        <input type="tel" name="phone" id="phone" value="{{ old('phone') }}" placeholder="مثال: 01234567890"
                             class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('phone') border-red-300 @enderror">
                     </div>
                     @error('phone')
@@ -161,14 +169,14 @@
 
                 <div class="">
                     <label for="phone" class="block text-sm font-medium text-gray-700">
-                        رقم الهاتف
+                        مستوى الوصول *
                     </label>
                     <div class="mt-1">
                         <select name="access_level" id="access_level"
                             class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('phone') border-red-300 @enderror">
-                            <option value="1">General manager</option>
-                            <option value="2">Application manager</option>
-                            <option value="3">Data Entry</option>
+                            <option value="1">مدير عام</option>
+                            <option value="2">مدير تطبيق</option>
+                            <option value="3">مدخل البيانات</option>
                         </select>
                     </div>
                     @error('access_level')
@@ -178,13 +186,13 @@
             </div>
 
             <!-- Address (Optional) -->
-            <div>
-                <label for="address" class="block text-sm font-medium text-gray-700">
-                    العنوان
-                </label>
-                <div class="mt-1">
-                    <textarea name="address" id="address" rows="3"
-                        class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('address') border-red-300 @enderror">{{ old('address') }}</textarea>
+            <div class="">
+                <div class="form-floating mt-1">
+                    <textarea name="address" id="address" placeholder=""
+                        class="form-control block w-full px-3 pt-4 pb-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('address') border-red-300 @enderror">{{ old('address') }}</textarea>
+                    <label for="address" class="form-label">
+                        العنوان
+                    </label>
                 </div>
                 @error('address')
                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -193,13 +201,12 @@
 
             <!-- Notes (Optional) -->
             <div>
-                <label for="notes" class="block text-sm font-medium text-gray-700">
-                    ملاحظات
-                </label>
-                <div class="mt-1">
-                    <textarea name="notes" id="notes" rows="3"
-                        placeholder="أي ملاحظات إضافية حول المستخدم..."
-                        class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('notes') border-red-300 @enderror">{{ old('notes') }}</textarea>
+                <div class="form-floating mt-1">
+                    <textarea name="notes" id="notes" placeholder=""
+                        class="form-control block w-full px-3 pt-4 pb-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('notes') border-red-300 @enderror">{{ old('notes') }}</textarea>
+                    <label for="notes" class="form-label">
+                        ملاحظات
+                    </label>
                 </div>
                 @error('notes')
                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -220,7 +227,7 @@
                     <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                     </svg>
-                    إنشاء المستخدم
+                    ارسال البيانات
                 </button>
             </div>
         </form>
@@ -231,7 +238,8 @@
         <div class="flex">
             <div class="flex-shrink-0">
                 <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                        clip-rule="evenodd"></path>
                 </svg>
             </div>
             <div class="mr-3">

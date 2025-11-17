@@ -44,6 +44,17 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    public function accessLevel()
+    {
+        if ($this->access_level == 1) {
+            return 'المدير العام';
+        } elseif ($this->access_level == 2) {
+            return 'مدير التطييق';
+        } else {
+            return 'مدخل بيانات';
+        }
+    }
+
     /**
      * Get the attributes that should be cast.
      *
@@ -197,6 +208,7 @@ class User extends Authenticatable
         parent::boot();
         static::creating(function ($user) {
             $user->serial_number = self::generateSerialNumber($user);
+            $user->access_level = 3;
         });
     }
 }

@@ -2,7 +2,7 @@
 @section('title', 'تفاصيل طلب الاشتراك')
 @section('content')
 <!-- Main Content -->
-<div class="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
+<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
     <!-- Breadcrumb & Back Button -->
     <x-breadcrumb :items="[
             ['label' => 'الاشتراكات', 'url' => route('client.subscriptions')],
@@ -12,8 +12,8 @@
     <x-back-button :url="route('client.subscriptions')" label="العودة للاشتراكات" />
 
     <!-- Status Header -->
-    <div class="bg-white overflow-hidden shadow rounded-lg mb-6">
-        <div class="px-4 py-5 sm:p-6">
+    <div class="bg-white overflow-hidden shadow-sm rounded-lg mb-6">
+        <div class="px-4 py-2 sm:p-6">
             <div class="flex items-center justify-between">
                 <div>
                     <h2 class="text-2xl font-bold text-gray-900">{{ $subscriptionRequest->subscription_name }}</h2>
@@ -33,6 +33,42 @@
                     </span>
                 </div>
             </div>
+
+            <!-- معلومات الدفع -->
+            @if($subscriptionRequest->payment_method)
+            <div class="mt-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="h-10 w-10 bg-green-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-credit-card text-green-600"></i>
+                        </div>
+                    </div>
+                    <div class="mr-3">
+                        <h3 class="text-sm font-medium text-green-900">معلومات الدفع</h3>
+                        <p class="mt-1 text-sm text-green-700">
+                            وسيلة الدفع: {{ $subscriptionRequest->getPaymentMethodName() }}
+                            @if($subscriptionRequest->quoted_price)
+                            - المبلغ: {{ number_format($subscriptionRequest->quoted_price, 2) }} جنيه
+                            @endif
+                        </p>
+                        @if($subscriptionRequest->payment_verification_status)
+                        <p class="mt-1 text-xs">
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+                                    @if($subscriptionRequest->payment_verification_status == 'pending') bg-yellow-100 text-yellow-800
+                                    @elseif($subscriptionRequest->payment_verification_status == 'verified') bg-green-100 text-green-800
+                                    @elseif($subscriptionRequest->payment_verification_status == 'rejected') bg-red-100 text-red-800
+                                    @endif">
+                                @if($subscriptionRequest->payment_verification_status == 'pending') في انتظار التحقق
+                                @elseif($subscriptionRequest->payment_verification_status == 'verified') تم التحقق من الدفع
+                                @elseif($subscriptionRequest->payment_verification_status == 'rejected') مرفوض
+                                @endif
+                            </span>
+                        </p>
+                        @endif
+                    </div>
+                </div>
+            </div>
+            @endif
 
             <!-- زر تخصيص الاشتراك - ثابت في جميع الحالات -->
             <div class="mt-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
@@ -145,15 +181,15 @@
     </div>
 
     <!-- Request Details -->
-    <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
-        <div class="px-4 py-5 sm:px-6">
+    <div class="bg-white shadow-sm overflow-hidden sm:rounded-lg mb-6">
+        <div class="px-4 py-2 sm:px-6">
             <h3 class="text-lg leading-6 font-medium text-gray-900">
                 تفاصيل الطلب
             </h3>
         </div>
         <div class="border-t border-gray-200">
             <dl>
-                <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <div class="bg-gray-50 px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                     <dt class="text-sm font-medium text-gray-500">
                         اسم الاشتراك
                     </dt>
@@ -161,7 +197,7 @@
                         {{ $subscriptionRequest->subscription_name }}
                     </dd>
                 </div>
-                <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                     <dt class="text-sm font-medium text-gray-500">
                         عدد الأجهزة المطلوبة
                     </dt>
@@ -169,7 +205,7 @@
                         {{ $subscriptionRequest->device_count }} {{ $subscriptionRequest->device_count == 1 ? 'جهاز' : 'أجهزة' }}
                     </dd>
                 </div>
-                <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <div class="bg-gray-50 px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                     <dt class="text-sm font-medium text-gray-500">
                         تاريخ البداية المقترح
                     </dt>
@@ -178,7 +214,7 @@
                     </dd>
                 </div>
                 @if($subscriptionRequest->notes)
-                <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                     <dt class="text-sm font-medium text-gray-500">
                         ملاحظات إضافية
                     </dt>
@@ -193,18 +229,18 @@
 
     @if($subscriptionRequest->status != 'pending' && $subscriptionRequest->quoted_price)
     <!-- Quote Details -->
-    <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
-        <div class="px-4 py-5 sm:px-6">
+    <div class="bg-white shadow-sm overflow-hidden sm:rounded-lg mb-6">
+        <div class="px-4 py-2 sm:px-6">
             <h3 class="text-lg leading-6 font-medium text-gray-900">
                 عرض السعر
             </h3>
             <p class="mt-1 max-w-2xl text-sm text-gray-500">
-                تم إرسال عرض السعر في {{ $subscriptionRequest->quoted_at->format('Y-m-d H:i') }}
+                تم إرسال عرض السعر في {{ $subscriptionRequest->quoted_at }}
             </p>
         </div>
         <div class="border-t border-gray-200">
             <dl>
-                <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <div class="bg-gray-50 px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                     <dt class="text-sm font-medium text-gray-500">
                         السعر الشهري
                     </dt>
@@ -212,7 +248,7 @@
                         {{ number_format($subscriptionRequest->quoted_price, 2) }} جنيه مصري
                     </dd>
                 </div>
-                <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                     <dt class="text-sm font-medium text-gray-500">
                         طريقة الدفع المقترحة
                     </dt>
@@ -221,7 +257,7 @@
                     </dd>
                 </div>
                 @if($subscriptionRequest->admin_notes)
-                <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <div class="bg-gray-50 px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                     <dt class="text-sm font-medium text-gray-500">
                         ملاحظات الإدارة
                     </dt>
@@ -237,8 +273,8 @@
 
     @if($subscriptionRequest->requestDevices->count() > 0)
     <!-- الأجهزة المخصصة -->
-    <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
-        <div class="px-4 py-5 sm:px-6">
+    <div class="bg-white shadow-sm overflow-hidden sm:rounded-lg mb-6">
+        <div class="px-4 py-2 sm:px-6">
             <h3 class="text-lg leading-6 font-medium text-gray-900">
                 📱 أجهزة iPhone المطلوبة
             </h3>
@@ -249,7 +285,7 @@
         <div class="border-t border-gray-200">
             <div class="divide-y divide-gray-200">
                 @foreach($subscriptionRequest->requestDevices as $device)
-                <div class="px-4 py-4 sm:px-6">
+                <div class="px-4 py-2 sm:px-6">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center">
                             <div class="flex-shrink-0">
@@ -286,15 +322,15 @@
 
     @if($subscriptionRequest->status == 'paid' || $subscriptionRequest->status == 'active')
     <!-- Payment Information -->
-    <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
-        <div class="px-4 py-5 sm:px-6">
+    <div class="bg-white shadow-sm overflow-hidden sm:rounded-lg mb-6">
+        <div class="px-4 py-2 sm:px-6">
             <h3 class="text-lg leading-6 font-medium text-gray-900">
                 معلومات الدفع
             </h3>
         </div>
         <div class="border-t border-gray-200">
             <dl>
-                <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <div class="bg-gray-50 px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                     <dt class="text-sm font-medium text-gray-500">
                         تاريخ الدفع
                     </dt>
@@ -303,7 +339,7 @@
                     </dd>
                 </div>
                 @if($subscriptionRequest->payment_receipt)
-                <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                     <dt class="text-sm font-medium text-gray-500">
                         إيصال الدفع
                     </dt>
@@ -319,17 +355,470 @@
     </div>
     @endif
 
+    <!-- قسم الدردشة والتعليقات -->
+    <div class="bg-white shadow-sm overflow-hidden sm:rounded-lg mb-6">
+        <div class="px-4 py-2 sm:px-6 border-b border-gray-200">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 flex items-center">
+                <i class="fas fa-comments text-blue-500 ml-2"></i>
+                الرسائل والتحديثات
+            </h3>
+            <p class="mt-1 max-w-2xl text-sm text-gray-500">
+                تواصل مع فريق الدعم حول طلب الاشتراك
+            </p>
+        </div>
+
+        <!-- منطقة عرض الرسائل -->
+        <div id="chat-messages" class="px-4 py-2 max-h-96 overflow-y-auto space-y-4">
+            <!-- سيتم تحميل الرسائل هنا بـ JavaScript -->
+        </div>
+
+        <!-- نموذج إرسال رسالة جديدة -->
+        <div class="px-4 py-2 border-t border-gray-200 bg-gray-50">
+            <form id="send-message-form" enctype="multipart/form-data">
+                @csrf
+                <input type="hidden" name="subscription_request_id" value="{{ $subscriptionRequest->id }}">
+
+                <div class="flex space-x-3 space-x-reverse">
+                    <div class="flex-1 form-floating">
+                        <textarea name="message" id="message-input" rows="2"
+                            class="form-control w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="اكتب رسالتك هنا..."
+                            required></textarea>
+
+                        <label for="message-attachment" class="">
+                            <i class="fas fa-paperclip ml-1"></i>
+                            مرفق
+                        </label>
+                        <input type="file" name="attachments[]" id="message-attachment" class="hidden" accept=".jpg,.jpeg,.png,.pdf" multiple>
+
+                    </div>
+                    <button type="submit"
+                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        <i class="fas fa-paper-plane ml-1"></i>
+                        إرسال
+                    </button>
+                </div>
+
+                <!-- عرض الملفات المختارة -->
+                <div id="selected-files" class="mt-2 hidden">
+                    <div class="text-sm text-gray-600">الملفات المختارة:</div>
+                    <div id="files-list" class="mt-1 space-y-1"></div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if($subscriptionRequest->status == 'paid' && $subscriptionRequest->subscription)
+    <!-- قسم رفع الشهادات -->
+    <div class="bg-white shadow-sm overflow-hidden sm:rounded-lg mb-6">
+        <div class="px-4 py-2 sm:px-6 border-b border-gray-200">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 flex items-center">
+                <i class="fas fa-certificate text-green-500 ml-2"></i>
+                رفع شهادات Apple Developer
+            </h3>
+            <p class="mt-1 max-w-2xl text-sm text-gray-500">
+                يرجى رفع شهادات Apple Developer الخاصة بك لتفعيل الاشتراك بالكامل
+            </p>
+        </div>
+
+        <div class="px-4 py-2 sm:px-6">
+            <!-- عرض الشهادات الموجودة -->
+            <div class="flex items-center justify-between mb-2">
+                <h4 class="text-sm font-medium text-gray-700">الشهادات المضافة</h4>
+                <button id="copy-certificates-btn"
+                    class="inline-flex items-center px-3 py-2 text-white border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-success hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <i class="fas fa-copy ml-1"></i>
+                    نسخ جميع الأكواد
+                </button>
+            </div>
+            <div id="certificates-list" class="mb-2">
+                <!-- سيتم تحميل الشهادات هنا بـ JavaScript -->
+            </div>
+        </div>
+
+        <!-- نموذج إضافة شهادة جديدة -->
+        <form id="add-certificate-form" class=" p-4">
+            @csrf
+            <input type="hidden" name="subscription_id" value="{{ $subscriptionRequest->subscription->id }}">
+
+            <div class="flex space-x-3 space-x-reverse">
+                <div class="input-group flex-1">
+                    <input type="text" name="certificate_code" id="certificate-code"
+                        class="form-control block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        placeholder="كود الشهادة (10 خانات - أرقام وحروف إنجليزية كبيرة)" maxlength="10" pattern="[A-Z0-9]{10}" required>
+                </div>
+                <div class="input-group flex-1">
+                    <input type="text" name="certificate_description" id="certificate-description"
+                        class="form-control block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        placeholder="وصف الشهادة (مثال: شهادة التطوير - iOS)" required>
+                </div>
+            </div>
+            <p class="text-xs text-gray-500 mt-2">
+                اكتب كود الشهادة ووصفها ثم اضغط Enter لإضافتها
+            </p>
+        </form>
+    </div>
+    @endif
+
     <!-- Action Buttons -->
     <div class="flex justify-between">
         <a href="{{ route('client.subscriptions') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">
             العودة للاشتراكات
         </a>
 
-        @if($subscriptionRequest->status == 'quoted')
+        @if($subscriptionRequest->status == 'pending')
         <a href="{{ route('client.subscription-requests.payment', $subscriptionRequest->id) }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
             متابعة الدفع
         </a>
         @endif
     </div>
 </div>
-@endsection
+
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const subscriptionRequestId = {{ $subscriptionRequest->id }};
+    const chatMessages = document.getElementById('chat-messages');
+    const sendMessageForm = document.getElementById('send-message-form');
+    const messageInput = document.getElementById('message-input');
+    const attachmentInput = document.getElementById('message-attachment');
+    const selectedFiles = document.getElementById('selected-files');
+    const filesList = document.getElementById('files-list');
+    const copyCertificatesBtn = document.getElementById('copy-certificates-btn');
+
+    // تحميل الرسائل
+    function loadMessages() {
+        console.log('Loading messages for subscription request:', subscriptionRequestId);
+        fetch(`/api/subscription-comments?subscription_request_id=${subscriptionRequestId}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log('Messages loaded:', data);
+                if (data.success) {
+                    displayMessages(data.comments);
+                } else {
+                    console.error('Failed to load messages:', data);
+                }
+            })
+            .catch(error => console.error('Error loading messages:', error));
+    }
+
+    // عرض الرسائل
+    function displayMessages(comments) {
+        chatMessages.innerHTML = '';
+        
+        if (comments.length === 0) {
+            chatMessages.innerHTML = `
+                <div class="text-center text-gray-500 py-8">
+                    <i class="fas fa-comments text-4xl mb-2"></i>
+                    <p>لا توجد رسائل بعد. ابدأ المحادثة!</p>
+                </div>
+            `;
+            return;
+        }
+
+        comments.forEach(comment => {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `flex ${comment.is_admin ? 'justify-start' : 'justify-end'}`;
+            
+            messageDiv.innerHTML = `
+                <div class="max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${comment.is_admin ? 'bg-gray-100 text-gray-800' : 'bg-blue-500 text-white'}">
+                    <div class="text-xs ${comment.is_admin ? 'text-gray-600' : 'text-blue-100'} mb-1">
+                        ${comment.sender_name} - ${comment.created_at_human}
+                    </div>
+                    <div class="text-sm">${comment.message}</div>
+                    ${comment.attachments && comment.attachments.length > 0 ? `
+                        <div class="mt-2 space-y-1">
+                            ${comment.attachments.map(attachment => `
+                                <a href="/storage/${attachment.path}" target="_blank" class="block text-xs underline">
+                                    <i class="fas fa-paperclip ml-1"></i>${attachment.name}
+                                </a>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+        });
+
+        // التمرير لأسفل
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // إرسال رسالة
+    sendMessageForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const submitButton = this.querySelector('button[type="submit"]');
+        
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin ml-1"></i> جاري الإرسال...';
+        
+        // إضافة CSRF token إلى FormData
+        formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+        
+        fetch('/api/subscription-comments', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                messageInput.value = '';
+                attachmentInput.value = '';
+                selectedFiles.classList.add('hidden');
+                filesList.innerHTML = '';
+                loadMessages();
+            } else {
+                console.error('Server error:', data);
+                alert('حدث خطأ أثناء إرسال الرسالة: ' + (data.message || 'خطأ غير معروف'));
+            }
+        })
+        .catch(error => {
+            console.error('Error sending message:', error);
+            alert('حدث خطأ أثناء إرسال الرسالة');
+        })
+        .finally(() => {
+            submitButton.disabled = false;
+            submitButton.innerHTML = '<i class="fas fa-paper-plane ml-1"></i> إرسال';
+        });
+    });
+
+    // معالجة اختيار الملفات
+    attachmentInput.addEventListener('change', function() {
+        const files = Array.from(this.files);
+        
+        if (files.length > 0) {
+            selectedFiles.classList.remove('hidden');
+            filesList.innerHTML = files.map(file => `
+                <div class="text-sm text-gray-600">
+                    <i class="fas fa-file ml-1"></i>${file.name} (${(file.size / 1024).toFixed(1)} KB)
+                </div>
+            `).join('');
+        } else {
+            selectedFiles.classList.add('hidden');
+        }
+    });
+
+    // تحميل الرسائل عند بداية الصفحة
+    loadMessages();
+
+    // تحديث الرسائل كل 30 ثانية
+    setInterval(loadMessages, 30000);
+
+    // معالجة إضافة الشهادات
+    const addCertificateForm = document.getElementById('add-certificate-form');
+    const certificateCode = document.getElementById('certificate-code');
+    const certificateDescription = document.getElementById('certificate-description');
+    const certificatesList = document.getElementById('certificates-list');
+
+    if (addCertificateForm) {
+        // إضافة الشهادة عند الضغط على Enter
+        addCertificateForm.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addCertificate();
+            }
+        });
+
+        function addCertificate() {
+            const code = certificateCode.value.trim().toUpperCase();
+            const description = certificateDescription.value.trim();
+
+            if (!code) {
+                alert('يرجى إدخال كود الشهادة');
+                return;
+            }
+
+            if (code.length !== 10 || !/^[A-Z0-9]{10}$/.test(code)) {
+                alert('كود الشهادة يجب أن يكون 10 خانات من الأرقام والحروف الإنجليزية الكبيرة فقط');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+            formData.append('subscription_id', '{{ $subscriptionRequest->subscription->id }}');
+            formData.append('certificate_key', code.toUpperCase());
+            formData.append('description', description);
+
+            fetch('/api/subscription-certificates/{{ $subscriptionRequest->subscription->id }}', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    certificateCode.value = '';
+                    certificateDescription.value = '';
+                    loadCertificates();
+                } else {
+                    alert('حدث خطأ: ' + (data.message || 'خطأ غير معروف'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('حدث خطأ أثناء إضافة الشهادة');
+            });
+        }
+
+        function loadCertificates() {
+            fetch(`/api/subscription-certificates/{{ $subscriptionRequest->subscription->id }}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayCertificates(data.certificates);
+                    }
+                })
+                .catch(error => console.error('Error loading certificates:', error));
+        }
+
+        function displayCertificates(certificates) {
+            if (!certificates || certificates.length === 0) {
+                certificatesList.innerHTML = '<p class="text-gray-500 text-sm">لا توجد شهادات مضافة بعد</p>';
+                if (copyCertificatesBtn) {
+                    copyCertificatesBtn.disabled = true;
+                }
+                return;
+            }
+
+            if (copyCertificatesBtn) {
+                copyCertificatesBtn.disabled = false;
+            }
+
+            certificatesList.innerHTML = certificates.map(cert => `
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg mb-2">
+                    <div>
+                        <div class="flex items-center space-x-2 space-x-reverse">
+                            <span class="font-mono text-sm font-bold text-blue-600">${cert.certificate_key}</span>
+                            <button type="button" class="text-xs text-blue-600 hover:text-blue-800 underline" onclick="copySingleCertificate('${cert.certificate_key}')">نسخ الكود</button>
+                        </div>
+                        <div class="text-sm text-gray-600">${cert.description}</div>
+                    </div>
+                    <div class="text-xs text-gray-500">
+                        ${cert.created_at}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // نسخ كود شهادة واحدة
+        function copySingleCertificate(code) {
+            const text = code;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text)
+                    .then(() => alert('تم نسخ كود الشهادة للحافظة'))
+                    .catch(err => {
+                        console.error('Clipboard API error:', err);
+                        alert('فشل في نسخ الكود للحافظة');
+                    });
+            } else {
+                try {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    textarea.style.position = 'fixed';
+                    textarea.style.opacity = '0';
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    const successful = document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    if (successful) {
+                        alert('تم نسخ كود الشهادة للحافظة');
+                    } else {
+                        alert('لم يتمكن المتصفح من نسخ الكود تلقائياً، برجاء النسخ يدوياً.');
+                    }
+                } catch (err) {
+                    console.error('execCommand copy error:', err);
+                    alert('فشل في نسخ الكود للحافظة');
+                }
+            }
+        }
+
+        // إتاحة الدالة للاستخدام من الـ onclick
+        window.copySingleCertificate = copySingleCertificate;
+
+        function copyAllCertificates() {
+            if (!copyCertificatesBtn) {
+                return;
+            }
+
+            fetch(`/api/subscription-certificates/{{ $subscriptionRequest->subscription->id }}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.certificates && data.certificates.length > 0) {
+                        const codes = data.certificates.map(cert => cert.certificate_key).join('\n');
+
+                        const originalText = copyCertificatesBtn.innerHTML;
+                        const originalClass = copyCertificatesBtn.className;
+
+                        // المتصفحات الحديثة (HTTPS)
+                        if (navigator.clipboard && navigator.clipboard.writeText) {
+                            navigator.clipboard.writeText(codes)
+                                .then(() => {
+                                    copyCertificatesBtn.innerHTML = '<i class="fas fa-check ml-1"></i>تم النسخ!';
+                                    copyCertificatesBtn.className = originalClass + ' bg-green-50 text-green-700 border-green-300';
+
+                                    setTimeout(() => {
+                                        copyCertificatesBtn.innerHTML = originalText;
+                                        copyCertificatesBtn.className = originalClass;
+                                    }, 2000);
+                                })
+                                .catch(err => {
+                                    console.error('فشل في النسخ (Clipboard API):', err);
+                                    alert('فشل في نسخ الأكواد للحافظة');
+                                });
+                        } else {
+                            // Fallback للبيئات التي لا تدعم navigator.clipboard (مثل HTTP أو متصفحات قديمة)
+                            try {
+                                const textarea = document.createElement('textarea');
+                                textarea.value = codes;
+                                textarea.style.position = 'fixed';
+                                textarea.style.opacity = '0';
+                                document.body.appendChild(textarea);
+                                textarea.select();
+
+                                const successful = document.execCommand('copy');
+                                document.body.removeChild(textarea);
+
+                                if (successful) {
+                                    copyCertificatesBtn.innerHTML = '<i class="fas fa-check ml-1"></i>تم النسخ!';
+                                    copyCertificatesBtn.className = originalClass + ' bg-green-50 text-green-700 border-green-300';
+
+                                    setTimeout(() => {
+                                        copyCertificatesBtn.innerHTML = originalText;
+                                        copyCertificatesBtn.className = originalClass;
+                                    }, 2000);
+                                } else {
+                                    alert('لم يتمكن المتصفح من نسخ الأكواد تلقائياً، برجاء النسخ يدوياً.');
+                                }
+                            } catch (err) {
+                                console.error('فشل في النسخ (execCommand):', err);
+                                alert('فشل في نسخ الأكواد للحافظة');
+                            }
+                        }
+                    } else {
+                        alert('لا توجد شهادات للنسخ');
+                    }
+                })
+                .catch(error => {
+                    console.error('خطأ في تحميل الشهادات:', error);
+                    alert('حدث خطأ أثناء تحميل الشهادات');
+                });
+        }
+
+        if (copyCertificatesBtn) {
+            copyCertificatesBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                copyAllCertificates();
+            });
+        }
+
+        // تحميل الشهادات عند بداية الصفحة
+        loadCertificates();
+    }
+});
+</script>

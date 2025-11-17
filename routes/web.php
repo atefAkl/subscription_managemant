@@ -17,6 +17,8 @@ use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\keyManagementController;
 use App\Http\Controllers\PackageFeaturesController;
 use App\Http\Controllers\ServicePackageController;
+use App\Http\Controllers\SubscriptionCommentController;
+use App\Http\Controllers\SubscriptionCertificateController;
 use Illuminate\Support\Facades\Route;
 
 // Home Page
@@ -285,4 +287,27 @@ Route::middleware('auth')->group(function () {
         // Statistics
         Route::get('/statistics', [StatisticsController::class, 'index'])->name('statistics');
     });
+});
+
+// API Routes for AJAX calls
+Route::middleware(['auth'])->group(function () {
+    // Subscription Comments API
+    Route::get('/api/subscription-comments', [SubscriptionCommentController::class, 'index']);
+    Route::post('/api/subscription-comments', [SubscriptionCommentController::class, 'store']);
+    Route::delete('/api/subscription-comments/{id}', [SubscriptionCommentController::class, 'destroy']);
+
+    // Subscription Certificates API
+    Route::get('/api/subscription-certificates/{subscriptionId}', [SubscriptionCertificateController::class, 'index']);
+    Route::post('/api/subscription-certificates/{subscriptionId}', [SubscriptionCertificateController::class, 'store']);
+    Route::post('/api/subscription-certificates/{subscriptionId}/admin', [SubscriptionCertificateController::class, 'adminStore']);
+    Route::put('/api/subscription-certificates/{certificateId}/status', [SubscriptionCertificateController::class, 'updateStatus']);
+    Route::post('/api/subscriptions/{subscriptionId}/activate', [SubscriptionCertificateController::class, 'activateSubscription']);
+    Route::delete('/api/subscription-certificates/{certificateId}', [SubscriptionCertificateController::class, 'destroy']);
+
+    // Admin Payment Verification API
+    Route::post('/api/subscription-requests/{id}/verify-payment', [SubscriptionRequestController::class, 'verifySubscriptionPayment']);
+
+    // Subscription Certificates API
+    Route::get('/api/subscription-certificates', [SubscriptionCertificateController::class, 'index']);
+    Route::post('/api/subscription-certificates', [SubscriptionCertificateController::class, 'store']);
 });
